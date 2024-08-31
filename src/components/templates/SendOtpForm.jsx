@@ -16,13 +16,13 @@ import Grid from "@mui/material/Grid";
 import { sendOtp } from "../../services/auth";
 
 //material ui setting for input
-const theme = (outerTheme) =>
-  createTheme({
-    direction: "rtl",
-    palette: {
-      mode: outerTheme.palette,
-    },
-  });
+// const theme = (outerTheme) =>
+//   createTheme({
+//     direction: "rtl",
+//     palette: {
+//       mode: outerTheme.palette,
+//     },
+//   });
   
   //material ui setting for input
   const cacheRtl = createCache({
@@ -68,7 +68,7 @@ const theme = (outerTheme) =>
               </Typography>
               <label htmlFor="input">شماره موبایل خود را وارد کنید</label>
               <CacheProvider value={cacheRtl}>
-                <ThemeProvider theme={theme}>
+              
                   <div dir="rtl">
                     <TextField
                       id="outlined-basic"
@@ -77,12 +77,11 @@ const theme = (outerTheme) =>
                       sx={{ m: 4 }}
                       type="text"
                       name="mobile"
-                      placeholder="********091"
+                      placeholder="*********09"
                       value={mobile}
                       onChange={(e) => setMobile(e.target.value)}
                     />
                   </div>
-                </ThemeProvider>
               </CacheProvider>
               <Button variant="contained" type="submit">
                 ارسال کد تایید
