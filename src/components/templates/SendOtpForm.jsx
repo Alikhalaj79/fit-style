@@ -1,4 +1,5 @@
 import * as React from "react";
+import { useState } from "react";
 //material ui imports
 import {
   Card,
@@ -29,13 +30,13 @@ const cacheRtl = createCache({
   stylisPlugins: [prefixer, rtlPlugin],
 });
 
-const SendOtpForm = ({ mobile, setStep, setMobile }) => {
-  const [otp, setOtp] = React.useState(null); //set otp in this component for showing the code to user
-  const [loading, setLoading] = React.useState(false);
-  const [openDialog, setOpenDialog] = React.useState(false); //Control dialog open/close
-  const [snackbarOpen, setSnackbarOpen] = React.useState(false);
-  const [errorDialogOpen, setErrorDialogOpen] = React.useState(false); // Control error dialog open/close
-  const [errorMessage, setErrorMessage] = React.useState(""); // Store error message
+const SendOtpForm = ({ mobile, setStep, setMobile , startTimer ,timer }) => {
+  const [otp, setOtp] = useState(null); //set otp in this component for showing the code to user
+  const [loading, setLoading] = useState(false);
+  const [openDialog, setOpenDialog] = useState(false); //Control dialog open/close
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [errorDialogOpen, setErrorDialogOpen] = useState(false); // Control error dialog open/close
+  const [errorMessage, setErrorMessage] = useState(""); // Store error message
 
   //handle form to submit mobile number
   const submitHandler = async (event) => {
@@ -46,8 +47,10 @@ const SendOtpForm = ({ mobile, setStep, setMobile }) => {
     console.log(response, error);
     if (response) {
       // setStep(2);
+      console.log(response);
       setOtp(response.data.data.code);
       setOpenDialog(true);
+      startTimer();
     } else {
       setErrorMessage("مشکلی پیش آمده است. لطفاً دوباره تلاش کنید."); // Set error message
       setErrorDialogOpen(true); // Open error dialog
@@ -83,7 +86,7 @@ const SendOtpForm = ({ mobile, setStep, setMobile }) => {
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
-        minHeight: "100vh",
+        // minHeight: "100vh",
       }}
     >
       <Grid2>
@@ -95,6 +98,7 @@ const SendOtpForm = ({ mobile, setStep, setMobile }) => {
             maxWidth: "400px",
             width: "100%",
             boxShadow: "rgba(0,0,0,0.1) 0px 4px 12px",
+            marginTop: "100px",
           }}
         >
           <CardContent sx={{ textAlign: "center" }}>
@@ -152,6 +156,13 @@ const SendOtpForm = ({ mobile, setStep, setMobile }) => {
             <strong style={{ cursor: "pointer" }} onClick={handleCopyOtp}>
               {otp}
             </strong>
+            <Typography
+              variant="body2"
+              color="textSecondary"
+              sx={{ marginTop: 2 }}
+            >
+              اعتبار کد: {timer} ثانیه
+            </Typography>
           </Typography>
           <Typography
             variant="body2"
