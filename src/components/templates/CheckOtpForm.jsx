@@ -120,7 +120,7 @@ const CheckOtpForm = ({ mobile, code, setCode, setStep , startTimer , timer}) =>
             </Typography>
             <Typography variant="body2" color="textSecondary" mb={2}>
               اعتبار کد: {timer} ثانیه
-            <Button variant="contained" sx={{mr: 2}} onClick={resendHandler} disabled={resendDisabled}>ارسال دوباره کد</Button>
+            <Button variant="outlined" sx={{mr: 2}} onClick={resendHandler} disabled={resendDisabled}>ارسال دوباره کد</Button>
             </Typography>
             <CacheProvider value={cacheRtl}>
               <div dir="rtl">

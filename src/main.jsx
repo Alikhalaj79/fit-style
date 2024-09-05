@@ -1,16 +1,21 @@
-import React from 'react'
-import ReactDOM from 'react-dom/client'
-import App from './App'
+import React from "react";
+import ReactDOM from "react-dom/client";
+import App from "./App";
 
-import "./styles/index.css"
-import "./styles/fonts.css"
-import { ThemeProvider } from '@mui/material'
-import theme from './mui/theme'
+import "./styles/index.css";
+import "./styles/fonts.css";
+import { ThemeProvider } from "@mui/material";
+import theme from "./mui/theme"; //custom theme from materialUI
+import { BrowserRouter } from "react-router-dom";
 
-ReactDOM.createRoot(document.getElementById('root')).render(
+ReactDOM.createRoot(document.getElementById("root")).render(
   <>
-  <ThemeProvider theme={theme}>
-    <App />
-  </ThemeProvider>
-  </>,
-)
+    {/* //Provide custom theme use material UI */}
+    <ThemeProvider theme={theme}>
+      {/* //Browser Router for routing web Pages using react router dom */}
+      <BrowserRouter>
+        <App />
+      </BrowserRouter>
+    </ThemeProvider>
+  </>
+);
