@@ -7,4 +7,10 @@ const setCookie = tokens =>{
     document.cookie = `refreshToken=${tokens.refreshToken}; max-age=${30 * 24 * 60 * 60}`;
 }
 
-export {setCookie}
+const getCookie = () => {
+    return document.cookie.split("=")[1]
+}
+
+
+
+export {setCookie , getCookie}

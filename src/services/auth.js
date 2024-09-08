@@ -1,4 +1,4 @@
-import api from "./api"
+import api from "../configs/api"
 
 const sendOtp = async (mobile) => {
     try {
