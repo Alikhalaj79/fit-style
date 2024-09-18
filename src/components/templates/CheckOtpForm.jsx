@@ -18,14 +18,23 @@ import { prefixer } from "stylis";
 import { CacheProvider } from "@emotion/react";
 import createCache from "@emotion/cache";
 import { checkOtp, sendOtp } from "../../services/auth";
-import { setCookie } from "../../utils/cookie";
+import { useNavigate } from "react-router-dom";
+import {   useQuery } from "@tanstack/react-query";
+import { getUserProfile } from "../../services/users";
 
 const cacheRtl = createCache({
   key: "muirtl",
   stylisPlugins: [prefixer, rtlPlugin],
 });
 
-const CheckOtpForm = ({ mobile, code, setCode, setStep , startTimer , timer}) => {
+const CheckOtpForm = ({
+  mobile,
+  code,
+  setCode,
+  setStep,
+  startTimer,
+  timer,
+}) => {
   const [otp, setOtp] = useState(null); //set otp in this component for showing the code to user
   const [openDialog, setOpenDialog] = useState(false); //Control dialog open/close
   const [snackbarOpen, setSnackbarOpen] = useState(false);
@@ -34,11 +43,24 @@ const CheckOtpForm = ({ mobile, code, setCode, setStep , startTimer , timer}) =>
   const [errorMessage, setErrorMessage] = useState("");
   const [resendDisabled, setResendDisabled] = useState(true); // handle resend button disable
 
+ 
+
+  // const queryClient = useQueryClient()
+     const {
+       refetch,
+     } = useQuery({
+       queryKey: ["profile"],
+       queryFn: getUserProfile,
+      //  enabled: false,
+     });
+
+
+  const navigate = useNavigate();
+
   //enable resend button
   useEffect(() => {
     setResendDisabled(timer > 0);
   }, [timer]);
-
 
   //handle otp
   const submitHandler = async (event) => {
@@ -48,9 +70,8 @@ const CheckOtpForm = ({ mobile, code, setCode, setStep , startTimer , timer}) =>
     setLoading(false);
 
     if (response) {
-      console.log("کد تایید شد، می‌توانید ادامه دهید");
-      console.log(response);
-      setCookie(response.data.data.user);
+      navigate("/");
+      refetch();
     } else {
       setErrorMessage("مشکلی پیش آمده است. لطفاً دوباره تلاش کنید."); // Set error message
       setErrorDialogOpen(true); // Open error dialog
@@ -87,7 +108,7 @@ const CheckOtpForm = ({ mobile, code, setCode, setStep , startTimer , timer}) =>
     console.log(response, error);
     if (response) {
       console.log(response);
-      setOtp(response.data.data.code);// for showing code to user
+      setOtp(response.data.data.code); // for showing code to user
       setOpenDialog(true);
       startTimer();
     } else {
@@ -120,7 +141,14 @@ const CheckOtpForm = ({ mobile, code, setCode, setStep , startTimer , timer}) =>
             </Typography>
             <Typography variant="body2" color="textSecondary" mb={2}>
               اعتبار کد: {timer} ثانیه
-            <Button variant="outlined" sx={{mr: 2}} onClick={resendHandler} disabled={resendDisabled}>ارسال دوباره کد</Button>
+              <Button
+                variant="outlined"
+                sx={{ mr: 2 }}
+                onClick={resendHandler}
+                disabled={resendDisabled}
+              >
+                ارسال دوباره کد
+              </Button>
             </Typography>
             <CacheProvider value={cacheRtl}>
               <div dir="rtl">
