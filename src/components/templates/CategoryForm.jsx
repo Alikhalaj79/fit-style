@@ -214,8 +214,6 @@ const CategoryForm = () => {
           </FormControl>
         </CacheProvider>
 
-        {error && <Typography color="error">{error.message}</Typography>}
-
         <Button
           variant="contained"
           color="primary"
@@ -223,7 +221,7 @@ const CategoryForm = () => {
           fullWidth
           sx={{ mt: 2 }}
         >
-          {isLoading ? "در حال ارسال..." : "ایجاد دسته‌بندی"}
+          {isLoading ? "در حال ارسال..." : "ایجاد دسته‌ بندی"}
         </Button>
       </Box>
       <Snackbar
