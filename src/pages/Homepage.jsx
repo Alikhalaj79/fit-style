@@ -1,9 +1,12 @@
+import { useQuery } from '@tanstack/react-query';
 import React from 'react';
 // import AuthPage from './AuthPage';
 import { Link } from 'react-router-dom';
+import { getUserProfile } from '../services/users';
 
-const Homepage = ({data}) => {
-    
+const Homepage = () => {
+     const { data } = useQuery({queryKey: ["profile"],queryFn: getUserProfile,});
+
     return (
       <div>
         {data ? <Link to="/user">userPage</Link> : null}

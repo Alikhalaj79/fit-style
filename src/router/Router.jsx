@@ -10,23 +10,25 @@ import { getUserProfile } from "../services/users";
 
 const Router = () => {
   
-  const {data, isLoading,isFetching,error,} = useQuery({
+  const {data, isLoading,isFetching,isPending,error,} = useQuery({
     queryKey: ["profile"],
     queryFn: getUserProfile,
   });
   console.log({data, isFetching, isLoading, error});
   
+  if (isLoading) return <h3>Loading...</h3>
+  
   return (
     <Routes>
-      <Route index element={<Homepage data={data} />} />
-      <Route path="/login" element={<AuthPage />} />
+      <Route index element={<Homepage />} />
+      <Route path="/login" element={data? <Navigate to="/user" />:<AuthPage />} />
       <Route
         path="/admin"
         element={
-          data && data.data.data.user.role === "admin" ? (
+          data && data?.data?.data?.user.role === "admin" ? (
             <AdminPage />
           ) : (
-            <Navigate to="/user" />
+            <Navigate to="/" />
           )
         }
       />

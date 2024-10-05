@@ -14,6 +14,7 @@ import {
   Snackbar,
   CircularProgress,
   Backdrop,
+  Grid2,
 } from "@mui/material";
 import rtlPlugin from "stylis-plugin-rtl";
 import { prefixer } from "stylis";
@@ -22,7 +23,6 @@ import createCache from "@emotion/cache";
 
 //a function for handle send otp
 import { sendOtp } from "../../services/auth";
-import Grid2 from "@mui/material/Unstable_Grid2/Grid2";
 
 //material ui direction setting for input
 const cacheRtl = createCache({
