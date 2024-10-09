@@ -1,26 +1,24 @@
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import React, { useState } from "react";
+import { deleteCategory, getCategories } from "../../services/admin";
 import {
-  TextField,
-  Button,
-  Snackbar,
-  Alert,
-  Typography,
   Box,
-  Select,
-  MenuItem,
-  InputLabel,
+  Button,
+  Collapse,
   FormControl,
   IconButton,
-  Collapse,
+  InputLabel,
+  MenuItem,
+  Select,
+  Typography,
+  Snackbar,
+  Alert,
 } from "@mui/material";
-import ExpandLess from "@mui/icons-material/ExpandLess";
-import ExpandMore from "@mui/icons-material/ExpandMore";
+import { ExpandLess, ExpandMore } from "@mui/icons-material";
 import { CacheProvider } from "@emotion/react";
 import createCache from "@emotion/cache";
 import rtlPlugin from "stylis-plugin-rtl";
 import { prefixer } from "stylis";
-import { createCategory, getCategories } from "../../services/admin";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 // Material UI direction setting for input
 const cacheRtl = createCache({
@@ -28,51 +26,42 @@ const cacheRtl = createCache({
   stylisPlugins: [prefixer, rtlPlugin],
 });
 
-const CategoryForm = () => {
+const DeleteCategory = () => {
   const queryClient = useQueryClient();
+  const [form, setForm] = useState({ id: "" });
   const [openSnackbar, setOpenSnackbar] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const [snackbarSeverity, setSnackbarSeverity] = useState("success");
-
-  const [formData, setFormData] = useState({ title: "" , slug: "" , icon: "" , parent: "" , });
-
   const [openCategories, setOpenCategories] = useState({});
 
-  const { data: getCategoriesData } = useQuery({
+  const {
+    data: categoryData,
+    isLoading,
+    error,
+  } = useQuery({
     queryKey: ["getCategories"],
     queryFn: getCategories,
   });
 
-  const { mutate, isLoading, error } = useMutation({
-    mutationFn: createCategory,
+  const {
+    mutate,
+    isLoading: mutateLoading,
+    error: mutateError,
+  } = useMutation({
+    mutationFn: deleteCategory,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["getCategories"] });
-      setSnackbarMessage("دسته‌ بندی با موفقیت ایجاد شد!");
+      setSnackbarMessage("دسته‌ بندی با موفقیت حذف شد!");
       setSnackbarSeverity("success");
       setOpenSnackbar(true);
     },
     onError: (error) => {
       console.log(error);
-      setSnackbarMessage("خطا در ایجاد دسته‌ بندی");
-      setSnackbarSeverity("error"); 
+      setSnackbarMessage("خطا در حذف دسته‌ بندی");
+      setSnackbarSeverity("error");
       setOpenSnackbar(true);
     },
   });
-
-  const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    const filteredData = { ...formData };
-    if (!filteredData.slug) delete filteredData.slug;
-    if (!filteredData.parent) delete filteredData.parent;
-    mutate(filteredData);
-  };
 
   const handleToggle = (categoryId) => {
     setOpenCategories((prevOpen) => ({
@@ -81,73 +70,62 @@ const CategoryForm = () => {
     }));
   };
 
+  const handleChange = (e) => {
+    setForm({
+      id: e.target.value,
+    });
+  };
+
+  const handleDelete = (e) => {
+    e.preventDefault();
+    if(!form.id){
+      setSnackbarMessage("لطفا یک دسته بندی را انتخاب کنید!")
+      setSnackbarSeverity("error");
+      setOpenSnackbar(true)
+    }else{
+      mutate(form.id);
+    }
+    console.log(form.id);
+  };
+
   const handleCloseSnackbar = () => {
     setOpenSnackbar(false);
   };
 
   return (
     <div>
-      <Box component="form" onSubmit={handleSubmit} sx={{ maxWidth: 400, mt: 3 }}>
-        <Typography variant="h6" mb={2}>
-          ایجاد دسته‌بندی جدید
-        </Typography>
-
+      <Typography variant="h6" mt={3}>
+        حذف دسته بندی
+      </Typography>
+      <Box
+        component="form"
+        onSubmit={handleDelete}
+        sx={{ maxWidth: 400, mt: 4 }}
+      >
         <CacheProvider value={cacheRtl}>
-          <TextField
-            label="عنوان"
-            name="title"
-            value={formData.title}
-            onChange={handleChange}
-            required
-            fullWidth
-            margin="normal"
-          />
-          <TextField
-            label="اسلاگ (Slug)"
-            name="slug"
-            value={formData.slug}
-            onChange={handleChange}
-            fullWidth
-            margin="normal"
-          />
-          <TextField
-            label="آیکون"
-            name="icon"
-            value={formData.icon}
-            onChange={handleChange}
-            required
-            fullWidth
-            margin="normal"
-          />
-
-          <FormControl fullWidth margin="normal">
-            <InputLabel>دسته‌بندی والد</InputLabel>
+          <FormControl fullWidth>
+            <InputLabel>انتخاب دسته</InputLabel>
             <Select
-              label="دسته‌بندی والد"
-              name="parent"
-              value={formData.parent}
-              onChange={(e) =>
-                setFormData({ ...formData, parent: e.target.value })
-              }
+              labelId="demo-simple-select-label"
+              id="demo-simple-select"
+              label="انتخاب دسته"
+              value={form.id}
+              onChange={handleChange}
               renderValue={(selected) => {
-                // search in parents
                 let selectedCategory =
-                  getCategoriesData?.data?.data?.categories?.find(
+                  categoryData?.data?.data?.categories?.find(
                     (category) => category._id === selected
                   );
 
-                // search in children if category not found in parents
                 if (!selectedCategory) {
-                  getCategoriesData?.data?.data?.categories?.forEach(
-                    (category) => {
-                      const childCategory = category.children?.find(
-                        (child) => child._id === selected
-                      );
-                      if (childCategory) {
-                        selectedCategory = childCategory;
-                      }
+                  categoryData?.data?.data?.categories?.forEach((category) => {
+                    const childCategory = category.children?.find(
+                      (child) => child._id === selected
+                    );
+                    if (childCategory) {
+                      selectedCategory = childCategory;
                     }
-                  );
+                  });
                 }
 
                 return selectedCategory
@@ -155,13 +133,11 @@ const CategoryForm = () => {
                   : "انتخاب کنید";
               }}
             >
-              {getCategoriesData?.data?.data?.categories?.map((category) => (
+              {categoryData?.data?.data?.categories?.map((category) => (
                 <div key={category._id}>
                   <MenuItem
                     value={category._id}
-                    onClick={() =>
-                      setFormData({ ...formData, parent: category._id })
-                    }
+                    onClick={() => setForm({ ...form, id: category._id })}
                   >
                     <Box display="flex" alignItems="center">
                       {category.title}
@@ -183,7 +159,6 @@ const CategoryForm = () => {
                     </Box>
                   </MenuItem>
 
-                      {/* show children categories */}
                   {category.children?.length > 0 && (
                     <Collapse
                       in={openCategories[category._id]}
@@ -194,12 +169,12 @@ const CategoryForm = () => {
                         <MenuItem
                           key={child._id}
                           value={child._id}
-                          sx={{ pl: 4 }} 
+                          sx={{ pl: 4 }}
                           onClick={(e) => {
                             e.stopPropagation();
-                            setFormData((prevData) => ({
+                            setForm((prevData) => ({
                               ...prevData,
-                              parent: child._id,
+                              id: child._id,
                             }));
                           }}
                         >
@@ -213,27 +188,26 @@ const CategoryForm = () => {
             </Select>
           </FormControl>
         </CacheProvider>
-
         <Button
           variant="contained"
-          color="primary"
+          color="error"
           type="submit"
           fullWidth
           sx={{ mt: 2 }}
         >
-          {isLoading ? "در حال ارسال..." : "ایجاد دسته‌ بندی"}
+          {mutateLoading ? "در حال حذف..." : "حذف دسته بندی"}
         </Button>
       </Box>
       <Snackbar
         open={openSnackbar}
-        autoHideDuration={6000} 
+        autoHideDuration={6000}
         onClose={handleCloseSnackbar}
-        anchorOrigin={{ vertical: "top", horizontal: "center" }} 
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
       >
         <Alert
           onClose={handleCloseSnackbar}
           severity={snackbarSeverity}
-          sx={{ width: "100%" ,gap: 2}}
+          sx={{ width: "100%" , gap: 2 }}
         >
           {snackbarMessage}
         </Alert>
@@ -242,4 +216,4 @@ const CategoryForm = () => {
   );
 };
 
-export default CategoryForm;
+export default DeleteCategory;
