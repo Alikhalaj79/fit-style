@@ -2,6 +2,7 @@ import React from 'react';
 import CategoryListForAdmin from '../components/templates/CategoryListForAdmin';
 import CategoryForm from '../components/templates/CategoryForm';
 import DeleteCategory from '../components/templates/DeleteCategory';
+import AddProductForm from '../components/templates/AddProductsForm';
 
 
 const AdminPage = () => {
@@ -15,6 +16,9 @@ const AdminPage = () => {
         <br />
         <hr />
         <DeleteCategory />
+        <br />
+        <hr />
+        <AddProductForm />
       </div>
     );
 };
