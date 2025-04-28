@@ -1,6 +1,6 @@
 import { useState } from "react";
-import SendOtpForm from "../components/templates/SendOtpForm";
-import CheckOtpForm from "../components/templates/CheckOtpForm";
+import SendOtpForm from "../components/templates/adminPage/adminComponents/SendOtpForm";
+import CheckOtpForm from "../components/templates/adminPage/adminComponents/CheckOtpForm";
 
 const AuthPage = () => {
   const [step, setStep] = useState(1);
@@ -25,10 +25,23 @@ const AuthPage = () => {
   return (
     <div>
       {step === 1 && (
-        <SendOtpForm setStep={setStep} mobile={mobile} setMobile={setMobile} startTimer={startTimer} timer={timer} />
+        <SendOtpForm
+          setStep={setStep}
+          mobile={mobile}
+          setMobile={setMobile}
+          startTimer={startTimer}
+          timer={timer}
+        />
       )}
       {step === 2 && (
-        <CheckOtpForm mobile={mobile} code={code} setCode={setCode} setStep={setStep} startTimer={startTimer} timer={timer}/>
+        <CheckOtpForm
+          mobile={mobile}
+          code={code}
+          setCode={setCode}
+          setStep={setStep}
+          startTimer={startTimer}
+          timer={timer}
+        />
       )}
     </div>
   );
