@@ -1,4 +1,5 @@
 myNotes.txt
+.env
 # Logs
 logs
 *.log
