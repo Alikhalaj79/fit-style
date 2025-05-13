@@ -11,6 +11,7 @@ import Shop from "../pages/Shop";
 import Cart from "../pages/Cart";
 import Favorite from "../pages/Favorite";
 import ProductDetails from "../pages/ProductDetails";
+import AboutUs from "../pages/AboutUs";
 
 const Router = () => {
   
@@ -46,6 +47,7 @@ const Router = () => {
       <Route path="/shop" element={<Shop />} />
       <Route path="/cart" element={<Cart />} />
       <Route path="/favorite" element={<Favorite />} />
+      <Route path="/about-us" element={<AboutUs />} />
       <Route path="*" element={<PageNotFound />} />
       <Route path="/product/:id" element={<ProductDetails />} />
     </Routes>
