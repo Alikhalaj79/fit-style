@@ -12,15 +12,15 @@ import Cart from "../pages/Cart";
 import Favorite from "../pages/Favorite";
 import ProductDetails from "../pages/ProductDetails";
 import AboutUs from "../pages/AboutUs";
+import ProductsByCategoryPage from "../pages/ProductsByCategoryPage";
 
 const Router = () => {
-  
-  const {data, isLoading,isFetching,isPending,error,} = useQuery({
+  const { data, isLoading, isFetching, isPending, error } = useQuery({
     queryKey: ["profile"],
     queryFn: getUserProfile,
   });
-  console.log({data, isFetching, isLoading, error});
-  
+  console.log({ data, isFetching, isLoading, error });
+
   // if (isFetching) return <h3>Loading...</h3>
   // if(!data)return null;
   return (
@@ -50,6 +50,10 @@ const Router = () => {
       <Route path="/about-us" element={<AboutUs />} />
       <Route path="*" element={<PageNotFound />} />
       <Route path="/product/:id" element={<ProductDetails />} />
+      <Route
+        path="/category/:categorySlug"
+        element={<ProductsByCategoryPage />}
+      />
     </Routes>
   );
 };

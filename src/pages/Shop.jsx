@@ -338,7 +338,9 @@ const Shop = () => {
                       {group.category.name}
                     </Typography>
                     <Link
-                      to={`/shop/more?category=${group.category.id}`}
+                      to={`/category/${
+                        group.category.slug || group.category.id
+                      }`}
                       style={{ textDecoration: "none" }}
                     >
                       <Button
