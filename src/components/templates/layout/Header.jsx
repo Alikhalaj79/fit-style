@@ -12,6 +12,8 @@ import {
   ListItem,
   ListItemText,
   Divider,
+  Menu,
+  MenuItem,
 } from "@mui/material";
 import { Link } from "react-router-dom";
 import MenuIcon from "@mui/icons-material/Menu";
@@ -24,10 +26,12 @@ import SettingsApplicationsIcon from "@mui/icons-material/SettingsApplications";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import ShoppingBagOutlinedIcon from "@mui/icons-material/ShoppingBagOutlined";
 import { fetchCart } from "../../../services/cartApi";
-import { useState } from "react";
+import { useState, useMemo } from "react";
+import { getProducts } from "../../../services/productsApi";
 
 const Header = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [categoryAnchorEl, setCategoryAnchorEl] = useState(null);
 
   const { data: profileData } = useQuery({
     queryKey: ["profile"],
@@ -40,6 +44,38 @@ const Header = () => {
     staleTime: 1000 * 60,
   });
 
+  const { data: productsData } = useQuery({
+    queryKey: ["products"],
+    queryFn: async () => {
+      const response = await getProducts();
+      return response.data;
+    },
+  });
+
+  // استخراج دسته‌بندی‌ها از محصولات
+  const categories = useMemo(() => {
+    const products = Array.isArray(productsData?.data?.products)
+      ? productsData.data.products
+      : [];
+    if (!products.length) return [];
+    const uniqueCategories = [];
+    const seenIds = new Set();
+
+    products.forEach((product) => {
+      const category = product.category;
+      if (category && category.id && !seenIds.has(category.id)) {
+        seenIds.add(category.id);
+        uniqueCategories.push({
+          id: category.id,
+          name: category.title,
+          slug: category.slug,
+        });
+      }
+    });
+
+    return uniqueCategories;
+  }, [productsData]);
+
   const getTotalQuantity = (cartData) => {
     if (!cartData || !cartData.items) return 0;
     return cartData.items.reduce((total, item) => total + item.quantity, 0);
@@ -51,10 +87,18 @@ const Header = () => {
     setMobileOpen(!mobileOpen);
   };
 
+  const handleCategoryMenuOpen = (event) => {
+    setCategoryAnchorEl(event.currentTarget);
+  };
+
+  const handleCategoryMenuClose = () => {
+    setCategoryAnchorEl(null);
+  };
+
   const menuItems = [
     { text: "صفحه اصلی", path: "/" },
     { text: "فروشگاه", path: "/shop" },
-    { text: "دسته بندی", path: "/categories" },
+    { text: "دسته بندی", hasMenu: true },
     { text: "درباره ما", path: "/about-us" },
   ];
 
@@ -64,8 +108,36 @@ const Header = () => {
       <Divider />
       <List>
         {menuItems.map((item) => (
-          <ListItem key={item.text} component={Link} to={item.path}>
+          <ListItem
+            key={item.text}
+            component={item.hasMenu ? "div" : Link}
+            to={!item.hasMenu ? item.path : undefined}
+          >
             <ListItemText primary={item.text} />
+          </ListItem>
+        ))}
+        {categories.map((category) => (
+          <ListItem
+            key={category.id}
+            component={Link}
+            to={`/category/${category.slug || category.id}`}
+            sx={{
+              textAlign: "right",
+              pl: { xs: 5, sm: 4 },
+              py: { xs: 1.5, sm: 1 },
+              "&:hover": {
+                backgroundColor: "rgba(255, 107, 0, 0.1)",
+              },
+            }}
+          >
+            <ListItemText
+              primary={category.name}
+              sx={{
+                "& .MuiTypography-root": {
+                  fontSize: { xs: "1rem", sm: "0.9rem" },
+                },
+              }}
+            />
           </ListItem>
         ))}
       </List>
@@ -131,16 +203,51 @@ const Header = () => {
               <Button
                 key={item.text}
                 color="inherit"
-                component={Link}
-                to={item.path}
+                component={item.hasMenu ? "div" : Link}
+                to={!item.hasMenu ? item.path : undefined}
+                onClick={item.hasMenu ? handleCategoryMenuOpen : undefined}
                 sx={{
                   mx: 1,
                   fontSize: { sm: "0.9rem", md: "1rem" },
+                  position: "relative",
                 }}
               >
                 {item.text}
               </Button>
             ))}
+            <Menu
+              anchorEl={categoryAnchorEl}
+              open={Boolean(categoryAnchorEl)}
+              onClose={handleCategoryMenuClose}
+              sx={{
+                "& .MuiPaper-root": {
+                  mt: 1,
+                  minWidth: { xs: "100%", sm: 200 },
+                  maxWidth: { xs: "100%", sm: "none" },
+                  maxHeight: { xs: "80vh", sm: "none" },
+                  overflowY: "auto",
+                },
+              }}
+            >
+              {categories.map((category) => (
+                <MenuItem
+                  key={category.id}
+                  component={Link}
+                  to={`/category/${category.slug || category.id}`}
+                  onClick={handleCategoryMenuClose}
+                  sx={{
+                    py: { xs: 1.5, sm: 1 },
+                    px: { xs: 2, sm: 1 },
+                    fontSize: { xs: "1rem", sm: "0.9rem" },
+                    "&:hover": {
+                      backgroundColor: "rgba(255, 107, 0, 0.1)",
+                    },
+                  }}
+                >
+                  {category.name}
+                </MenuItem>
+              ))}
+            </Menu>
           </Box>
 
           {/* right icons */}
@@ -148,7 +255,6 @@ const Header = () => {
             sx={{
               display: "flex",
               gap: { xs: 1, sm: 2 },
-              // alignItems: "center",
             }}
           >
             {/* admin btn */}
@@ -317,6 +423,30 @@ const Header = () => {
                     "& .MuiTypography-root": {
                       fontSize: "1rem",
                       fontWeight: 500,
+                    },
+                  }}
+                />
+              </ListItem>
+            ))}
+            {categories.map((category) => (
+              <ListItem
+                key={category.id}
+                component={Link}
+                to={`/category/${category.slug || category.id}`}
+                sx={{
+                  textAlign: "right",
+                  pl: { xs: 5, sm: 4 },
+                  py: { xs: 1.5, sm: 1 },
+                  "&:hover": {
+                    backgroundColor: "rgba(255, 107, 0, 0.1)",
+                  },
+                }}
+              >
+                <ListItemText
+                  primary={category.name}
+                  sx={{
+                    "& .MuiTypography-root": {
+                      fontSize: { xs: "1rem", sm: "0.9rem" },
                     },
                   }}
                 />
