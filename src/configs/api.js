@@ -2,7 +2,8 @@ import axios from "axios";
 import { getNewTokens } from "../utils/getNewTokens";
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_BASE_URL,
+  // baseURL: import.meta.env.VITE_BASE_URL,
+  baseURL: "https://clothing-store.liara.run/",
   headers: {
     "Content-Type": "application/json",
   },
