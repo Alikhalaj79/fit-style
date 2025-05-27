@@ -4,7 +4,16 @@ import { Box, Container, Typography } from "@mui/material";
 
 const Video = () => {
   return (
-    <Container sx={{ py: 8 }}>
+    <Container
+      maxWidth="lg"
+      sx={{
+        py: { xs: 4, sm: 6, md: 8 },
+        px: { xs: 1, sm: 2 },
+        width: "100%",
+        maxWidth: "100%",
+        boxSizing: "border-box",
+      }}
+    >
       <Box
         sx={{
           position: "relative",
@@ -14,6 +23,7 @@ const Video = () => {
           mx: "auto",
           overflow: "hidden",
           borderRadius: 2,
+          boxSizing: "border-box",
         }}
       >
         {/* ویدئو */}
@@ -44,6 +54,8 @@ const Video = () => {
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
+            px: { xs: 1, sm: 2 },
+            boxSizing: "border-box",
           }}
         >
           <Typography
@@ -54,6 +66,14 @@ const Video = () => {
               color: "white",
               fontWeight: "bold",
               textShadow: "0 2px 4px rgba(0, 0, 0, 0.6)",
+              fontSize: {
+                xs: "1.25rem",
+                sm: "1.75rem",
+                md: "2.25rem",
+              },
+              width: "100%",
+              maxWidth: "90%",
+              boxSizing: "border-box",
             }}
           >
             با فیت استایل حس واقعی استایل را تجربه کن
