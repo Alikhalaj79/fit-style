@@ -11,19 +11,19 @@ function App() {
   const queryClient = new QueryClient({ defaultOptions });
   return (
     <QueryClientProvider client={queryClient}>
-      <Container
-        maxWidth="xl"
-        sx={{
-          width: "100%",
-          maxWidth: "100%",
-          boxSizing: "border-box",
-          overflow: "hidden",
-        }}
-      >
-        <Layout>
+        <Container
+          maxWidth="100%"
+          sx={{
+            width: "100%",
+            maxWidth: "100%",
+            boxSizing: "border-box",
+            overflow: "hidden",
+          }}
+          >
+          <Layout>
           <Router />
-        </Layout>
-      </Container>
+      </Layout>
+        </Container>
       <ReactQueryDevtools />
     </QueryClientProvider>
   );
