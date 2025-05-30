@@ -55,10 +55,26 @@ const Shop = () => {
   } = useQuery({
     queryKey: ["products"],
     queryFn: async () => {
-      const response = await getProducts();
-      console.log("Raw API Response:", response);
-      console.log("Returning Data:", response.data);
-      return response.data; // response.data شامل { statusCode: 200, data: { products: [...] } }
+      try {
+        console.log(
+          "Fetching products from:",
+          "https://clothing-store.liara.run/products/all"
+        );
+        const response = await getProducts();
+        console.log("Raw API Response:", response);
+        console.log("Response URL:", response.config?.url);
+        console.log("Response Base URL:", response.config?.baseURL);
+        console.log("Returning Data:", response.data);
+        return response.data;
+      } catch (error) {
+        console.error("Error fetching products:", {
+          message: error.message,
+          status: error.response?.status,
+          url: error.config?.url,
+          baseURL: error.config?.baseURL,
+        });
+        throw error;
+      }
     },
   });
 

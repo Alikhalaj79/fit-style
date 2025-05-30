@@ -1,6 +1,26 @@
 import api from "../configs/api";
 
-const getProducts = () => api.get("products/all");
+const getProducts = async () => {
+  try {
+    const fullUrl = "https://clothing-store.liara.run/products/all";
+    console.log("Making request to:", fullUrl);
+    const response = await api.get(fullUrl);
+    console.log("API Response:", {
+      status: response.status,
+      url: response.config.url,
+      data: response.data,
+    });
+    return response;
+  } catch (error) {
+    console.error("Products API Error:", {
+      message: error.message,
+      status: error.response?.status,
+      url: error.config?.url,
+      data: error.response?.data,
+    });
+    throw error;
+  }
+};
 
 const baseURL = import.meta.env.VITE_BASE_URL;
 const getImageUrl = (relativePath) => {
