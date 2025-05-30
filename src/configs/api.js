@@ -1,8 +1,10 @@
 import axios from "axios";
 import { getNewTokens } from "../utils/getNewTokens";
 
-// Ensure we're using the correct backend URL
 const API_URL = "https://clothing-store.liara.run";
+
+// Add logout state flag
+let isLoggedOut = false;
 
 const api = axios.create({
   baseURL: API_URL,
@@ -15,11 +17,15 @@ const api = axios.create({
 //get new tokens if refreshToken is in cookie
 api.interceptors.response.use(
   (response) => {
-    // console.log(response);
     return response;
   },
   async (error) => {
     const originalRequest = error.config;
+
+    // Don't attempt token refresh if logged out
+    if (isLoggedOut) {
+      return Promise.reject(error);
+    }
 
     if (
       error.response &&
@@ -30,10 +36,9 @@ api.interceptors.response.use(
 
       try {
         await getNewTokens(); //get new tokens
-
         return api(originalRequest);
       } catch (refreshError) {
-        console.error("Token refresh failed:", refreshError);
+        isLoggedOut = true; // Set logout state on refresh failure
         return Promise.reject(refreshError);
       }
     }
@@ -41,5 +46,25 @@ api.interceptors.response.use(
     return Promise.reject(error);
   }
 );
+
+// Add logout function to api object
+api.logout = async () => {
+  try {
+    isLoggedOut = true; // Set logout flag
+    await api.post("auth/logout");
+  } catch (error) {
+    throw error;
+  } finally {
+    // Reset logout flag after a delay to prevent immediate re-login
+    setTimeout(() => {
+      isLoggedOut = false;
+    }, 5000); // 5 second delay
+  }
+};
+
+// Add login function to reset logout state
+api.login = () => {
+  isLoggedOut = false;
+};
 
 export default api;
