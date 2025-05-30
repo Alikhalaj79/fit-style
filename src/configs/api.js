@@ -1,8 +1,11 @@
 import axios from "axios";
 import { getNewTokens } from "../utils/getNewTokens";
 
+// Ensure we're using the correct backend URL
+const API_URL = "https://clothing-store.liara.run";
+
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL,
+  baseURL: API_URL,
   headers: {
     "Content-Type": "application/json",
   },
@@ -24,13 +27,12 @@ api.interceptors.response.use(
       !originalRequest._retry
     ) {
       originalRequest._retry = true;
-      
+
       try {
         await getNewTokens(); //get new tokens
 
         return api(originalRequest);
       } catch (refreshError) {
-
         console.error("Token refresh failed:", refreshError);
         return Promise.reject(refreshError);
       }
@@ -39,6 +41,5 @@ api.interceptors.response.use(
     return Promise.reject(error);
   }
 );
-
 
 export default api;
