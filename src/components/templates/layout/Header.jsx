@@ -179,15 +179,23 @@ const Header = () => {
           {/* logo */}
           <Link to="/">
             <Box
-              component="img"
-              src={Logo}
-              alt="لوگو"
               sx={{
-                height: { xs: 30, sm: 40 },
-                cursor: "pointer",
                 display: { xs: "none", sm: "block" },
               }}
-            />
+            >
+              <Typography
+                variant="h5"
+                sx={{
+                  color: "#fff",
+                  fontWeight: 400,
+                  textTransform: "uppercase",
+                  letterSpacing: "2px",
+                  textShadow: "2px 2px 4px rgba(255, 111, 0, 0.9)",
+                }}
+              >
+                FIT STYLE
+              </Typography>
+            </Box>
           </Link>
 
           {/* Desktop menu */}
@@ -393,15 +401,20 @@ const Header = () => {
             >
               <CloseIcon />
             </IconButton>
-            <Box
-              component="img"
-              src={Logo}
-              alt="لوگو"
-              sx={{
-                height: 40,
-                display: { xs: "block", sm: "none" },
-              }}
-            />
+            <Box>
+              <Typography
+                variant="h6"
+                sx={{
+                  color: "#fff",
+                  fontWeight: 400,
+                  textTransform: "uppercase",
+                  letterSpacing: "2px",
+                  textShadow: "2px 2px 4px rgba(255, 111, 0, 0.9)",
+                }}
+              >
+                FIT STYLE
+              </Typography>
+            </Box>
           </Box>
           <Divider />
           <List>
