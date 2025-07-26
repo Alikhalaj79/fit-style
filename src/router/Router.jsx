@@ -13,16 +13,33 @@ import Favorite from "../pages/Favorite";
 import ProductDetails from "../pages/ProductDetails";
 import AboutUs from "../pages/AboutUs";
 import ProductsByCategoryPage from "../pages/ProductsByCategoryPage";
+import CircularProgress from "@mui/material/CircularProgress";
+import Box from "@mui/material/Box";
 
 const Router = () => {
   const { data, isLoading, isFetching, isPending, error } = useQuery({
     queryKey: ["profile"],
     queryFn: getUserProfile,
+    retry: 1,
+    retryDelay: 1000,
+    staleTime: 5 * 60 * 1000, // 5 minutes
   });
   console.log({ data, isFetching, isLoading, error });
 
-  // if (isFetching) return <h3>Loading...</h3>
-  // if(!data)return null;
+  // Show loading only if it's the first load and we're fetching
+  if (isLoading && isFetching)
+    return (
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          minHeight: "60vh",
+        }}
+      >
+        <CircularProgress size={60} thickness={2} color="primary" />
+      </Box>
+    );
   return (
     <Routes>
       <Route index element={<Homepage />} />
