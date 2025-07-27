@@ -10,6 +10,25 @@ const theme = createTheme({
     fontWeightHeavy: 600,
   },
   direction: "rtl",
+  palette: {
+    background: {
+      default: "#F9F9F9",
+      paper: "#fff",
+    },
+    text: {
+      primary: "#222222",
+      secondary: "#4A4A4A",
+    },
+    primary: {
+      main: "#ff6f00",
+      contrastText: "#FFFFFF",
+    },
+    secondary: {
+      main: "#E65100",
+      contrastText: "#FFFFFF",
+    },
+    divider: "#BDBDBD",
+  },
   components: {
     MuiCssBaseline: {
       styleOverrides: {
