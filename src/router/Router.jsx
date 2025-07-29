@@ -24,7 +24,6 @@ const Router = () => {
     retryDelay: 1000,
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
-  console.log({ data, isFetching, isLoading, error });
 
   // Show loading only if it's the first load and we're fetching
   if (isLoading && isFetching)
