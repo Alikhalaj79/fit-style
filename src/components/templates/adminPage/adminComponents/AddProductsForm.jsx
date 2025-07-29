@@ -16,9 +16,9 @@ import { CacheProvider } from "@emotion/react";
 import createCache from "@emotion/cache";
 import rtlPlugin from "stylis-plugin-rtl";
 import { prefixer } from "stylis";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQueryClient, useMutation } from "@tanstack/react-query";
 import CategorySelector from "./CategorySelector";
-import axios from "axios";
+import { addProduct } from "../../../../services/productsApi";
 
 // Material UI direction setting for input
 const cacheRtl = createCache({
@@ -33,6 +33,22 @@ const AddProductForm = () => {
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const [snackbarSeverity, setSnackbarSeverity] = useState("success");
   const [openSnackbar, setOpenSnackbar] = useState(false);
+
+  // React Query mutation for adding product
+  const addProductMutation = useMutation({
+    mutationFn: addProduct,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["getProducts"] });
+      setSnackbarMessage("محصول با موفقیت اضافه شد!");
+      setSnackbarSeverity("success");
+      setOpenSnackbar(true);
+    },
+    onError: () => {
+      setSnackbarMessage("خطا در اضافه کردن محصول");
+      setSnackbarSeverity("error");
+      setOpenSnackbar(true);
+    },
+  });
 
   const [formData, setFormData] = useState({
     title: "",
@@ -69,7 +85,7 @@ const AddProductForm = () => {
     });
 
     const allFiles = [...formData.images, ...validFiles];
-   
+
     // Update formData with the selected files
     setFormData((prevData) => ({
       ...prevData,
@@ -134,23 +150,8 @@ const AddProductForm = () => {
       }
     });
 
-   try {
-    // Use axios.post directly with base URL from environment variables
-     await axios.post(
-      `${import.meta.env.VITE_BASE_URL}products/add`,
-      formDataObj,
-      { headers: { "Content-Type": "multipart/form-data" }, withCredentials: true }
-    );
-
-     queryClient.invalidateQueries({ queryKey: ["getProducts"] });
-     setSnackbarMessage("محصول با موفقیت اضافه شد!");
-     setSnackbarSeverity("success");
-     setOpenSnackbar(true);
-  } catch (error) {
-    setSnackbarMessage("خطا در اضافه کردن محصول");
-    setSnackbarSeverity("error");
-    setOpenSnackbar(true);
-  }
+    // Use React Query mutation to add product
+    addProductMutation.mutate(formDataObj);
   };
   const handleCloseSnackbar = () => {
     setOpenSnackbar(false);
@@ -205,12 +206,16 @@ const AddProductForm = () => {
                       </Typography>
                     </label>
                   </div>
-                      <Typography variant="body2" sx={{mt: 2}}>حجم عکس ها باید کم تر از دو مگابایت باشد</Typography>
+                  <Typography variant="body2" sx={{ mt: 2 }}>
+                    حجم عکس ها باید کم تر از دو مگابایت باشد
+                  </Typography>
 
                   {/* Show preview of selected images */}
                   {imagePreviews.length > 0 && (
                     <div style={{ marginTop: "20px" }}>
-                      <Typography variant="body1" sx={{mb: 2}}>پیش‌نمایش :</Typography>
+                      <Typography variant="body1" sx={{ mb: 2 }}>
+                        پیش‌نمایش :
+                      </Typography>
                       <div
                         style={{
                           display: "flex",
@@ -333,8 +338,15 @@ const AddProductForm = () => {
                   size={{ xs: 12, sm: 10, md: 8 }}
                   sx={{ display: "flex", justifyContent: "flex-end", mt: 2 }}
                 >
-                  <Button type="submit" variant="contained" color="primary">
-                    ثبت محصول
+                  <Button
+                    type="submit"
+                    variant="contained"
+                    color="primary"
+                    disabled={addProductMutation.isPending}
+                  >
+                    {addProductMutation.isPending
+                      ? "در حال ثبت..."
+                      : "ثبت محصول"}
                   </Button>
                 </Grid>
               </Grid>

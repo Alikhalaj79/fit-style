@@ -4,15 +4,14 @@ const getProducts = async () => {
   try {
     const fullUrl = "https://clothing-store.liara.run/products/all";
     const response = await api.get(fullUrl);
-   
+
     return response;
   } catch (error) {
-   
     throw error;
   }
 };
 
-const baseURL = import.meta.env.VITE_BASE_URL;
+const baseURL = import.meta.env.VITE_API_URL;
 const getImageUrl = (relativePath) => {
   if (!relativePath) return null;
 
@@ -98,6 +97,22 @@ const fetchCategories = async () => {
   }
 };
 
+/**
+ * Adds a new product to the system.
+ * @param {FormData} productData - The product data as FormData object.
+ * @returns {Promise} - The axios response promise containing the created product data.
+ */
+const addProduct = async (productData) => {
+  try {
+    const response = await api.post("products/add", productData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
 export {
   getProducts,
   getImageUrl,
@@ -105,4 +120,5 @@ export {
   editProduct,
   fetchProductById,
   fetchCategories,
+  addProduct,
 };
