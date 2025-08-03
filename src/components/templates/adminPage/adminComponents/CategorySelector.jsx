@@ -32,7 +32,7 @@ const CategorySelector = ({ formData, setFormData, labelText }) => {
   };
 
   const handleCategorySelect = (categoryId) => {
-    setFormData({ ...formData, parent: categoryId });
+    setFormData({ ...formData, parent: categoryId, category: categoryId });
   };
 
   const renderCategories = (categories, level = 0) => {
@@ -89,8 +89,8 @@ const CategorySelector = ({ formData, setFormData, labelText }) => {
         label={labelText}
         name="parent"
         value={formData.parent || ""}
-        onChange={(e) => setFormData({ ...formData, parent: e.target.value })}
-        renderValue={(selected) => {
+        onChange={(e) => setFormData({ ...formData, parent: e.target.value, category: e.target.value })}
+        renderValue={(selected) => {          
           let selectedCategory = categories.find(
             (category) => category._id === selected
           );
@@ -113,7 +113,6 @@ const CategorySelector = ({ formData, setFormData, labelText }) => {
               }
             });
           }
-
           return selectedCategory ? selectedCategory.title : "انتخاب کنید";
         }}
       >
