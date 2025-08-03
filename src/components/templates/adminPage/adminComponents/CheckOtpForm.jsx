@@ -19,7 +19,7 @@ import { CacheProvider } from "@emotion/react";
 import createCache from "@emotion/cache";
 import { checkOtp, sendOtp } from "../../../../services/auth";
 import { useNavigate } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import { getUserProfile } from "../../../../services/users";
 
 const cacheRtl = createCache({
@@ -43,11 +43,34 @@ const CheckOtpForm = ({
   const [errorMessage, setErrorMessage] = useState("");
   const [resendDisabled, setResendDisabled] = useState(true); // handle resend button disable
 
-  // const queryClient = useQueryClient()
+  const queryClient = useQueryClient();
   const { refetch } = useQuery({
     queryKey: ["profile"],
     queryFn: getUserProfile,
-    //  enabled: false,
+    enabled: false, // Disable automatic fetching
+  });
+
+  // Use mutation for login
+  const loginMutation = useMutation({
+    mutationFn: ({ mobile, code }) => checkOtp(mobile, code),
+    onSuccess: async (data) => {
+      if (data.response) {
+        // Clear all queries and invalidate specific ones
+        await queryClient.clear();
+        await queryClient.invalidateQueries({ queryKey: ["profile"] });
+        await queryClient.invalidateQueries({ queryKey: ["cart"] });
+
+        // Add a small delay to ensure cache is updated
+        setTimeout(() => {
+          navigate("/");
+        }, 200);
+      }
+    },
+    onError: (error) => {
+      setErrorMessage("مشکلی پیش آمده است. لطفاً دوباره تلاش کنید.");
+      setErrorDialogOpen(true);
+      console.log(error);
+    },
   });
 
   const navigate = useNavigate();
@@ -61,16 +84,13 @@ const CheckOtpForm = ({
   const submitHandler = async (event) => {
     event.preventDefault();
     setLoading(true);
-    const { response, error } = await checkOtp(mobile, code);
-    setLoading(false);
 
-    if (response) {
-      navigate("/");
-      refetch();
-    } else {
-      setErrorMessage("مشکلی پیش آمده است. لطفاً دوباره تلاش کنید."); // Set error message
-      setErrorDialogOpen(true); // Open error dialog
+    try {
+      await loginMutation.mutateAsync({ mobile, code });
+    } catch (error) {
       console.log(error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -165,9 +185,13 @@ const CheckOtpForm = ({
               variant="contained"
               type="submit"
               //   fullWidth
-              disabled={loading}
+              disabled={loading || loginMutation.isPending}
             >
-              {loading ? <CircularProgress size={24} /> : "ورود"}
+              {loading || loginMutation.isPending ? (
+                <CircularProgress size={24} />
+              ) : (
+                "ورود"
+              )}
             </Button>
             <Button
               onClick={() => setStep(1)}
@@ -183,7 +207,7 @@ const CheckOtpForm = ({
       {/* Backdrop with CircularProgress for loading */}
       <Backdrop
         sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
-        open={loading}
+        open={loading || loginMutation.isPending}
       >
         <CircularProgress color="inherit" />
       </Backdrop>

@@ -33,9 +33,13 @@ const Header = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [categoryAnchorEl, setCategoryAnchorEl] = useState(null);
 
-  const { data: profileData } = useQuery({
+  const { data: profileData, isLoading: profileLoading } = useQuery({
     queryKey: ["profile"],
     queryFn: getUserProfile,
+    staleTime: 1000 * 60 * 5, // 5 minutes
+    retry: 1,
+    refetchOnWindowFocus: false,
+    refetchOnMount: true,
   });
 
   const { data: cartData } = useQuery({

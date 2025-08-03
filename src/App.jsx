@@ -8,22 +8,24 @@ import { Container } from "@mui/material";
 
 function App() {
   //create client to use reactQuery
-  const queryClient = new QueryClient({ defaultOptions });
+  const queryClient = new QueryClient({
+    defaultOptions,
+  });
   return (
     <QueryClientProvider client={queryClient}>
-        <Container
-          maxWidth="100%"
-          sx={{
-            width: "100%",
-            maxWidth: "100%",
-            boxSizing: "border-box",
-            overflow: "hidden",
-          }}
-          >
-          <Layout>
+      <Container
+        maxWidth="100%"
+        sx={{
+          width: "100%",
+          maxWidth: "100%",
+          boxSizing: "border-box",
+          overflow: "hidden",
+        }}
+      >
+        <Layout>
           <Router />
-      </Layout>
-        </Container>
+        </Layout>
+      </Container>
       <ReactQueryDevtools />
     </QueryClientProvider>
   );

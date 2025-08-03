@@ -65,6 +65,8 @@ api.logout = async () => {
 // Add login function to reset logout state
 api.login = () => {
   isLoggedOut = false;
+  // Clear any existing error states
+  console.log("Login successful - logout state reset");
 };
 
 export default api;
