@@ -12,6 +12,7 @@ import {
   CircularProgress,
   Backdrop,
   Snackbar,
+  Alert,
 } from "@mui/material";
 import rtlPlugin from "stylis-plugin-rtl";
 import { prefixer } from "stylis";
@@ -44,31 +45,26 @@ const CheckOtpForm = ({
   const [resendDisabled, setResendDisabled] = useState(true); // handle resend button disable
 
   const queryClient = useQueryClient();
-  const { refetch } = useQuery({
-    queryKey: ["profile"],
-    queryFn: getUserProfile,
-    enabled: false, // Disable automatic fetching
-  });
-
   // Use mutation for login
   const loginMutation = useMutation({
     mutationFn: ({ mobile, code }) => checkOtp(mobile, code),
     onSuccess: async (data) => {
       if (data.response) {
-        // Clear all queries and invalidate specific ones
-        await queryClient.clear();
-        await queryClient.invalidateQueries({ queryKey: ["profile"] });
-        await queryClient.invalidateQueries({ queryKey: ["cart"] });
 
-        // Add a small delay to ensure cache is updated
-        setTimeout(() => {
-          navigate("/");
-        }, 200);
+          // Fetch profile directly
+          const profileData = await getUserProfile();
+          console.log("Profile data after login:", profileData);
+
+          // Check if profile was successfully fetched
+          if (profileData && profileData.data) {
+            // Invalidate queries to force refetch
+            await queryClient.invalidateQueries({ queryKey: ["profile"] });
+            await queryClient.invalidateQueries({ queryKey: ["cart"] });
+            
+        }
       }
     },
     onError: (error) => {
-      setErrorMessage("مشکلی پیش آمده است. لطفاً دوباره تلاش کنید.");
-      setErrorDialogOpen(true);
       console.log(error);
     },
   });

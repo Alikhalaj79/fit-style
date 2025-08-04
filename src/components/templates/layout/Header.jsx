@@ -36,16 +36,18 @@ const Header = () => {
   const { data: profileData, isLoading: profileLoading } = useQuery({
     queryKey: ["profile"],
     queryFn: getUserProfile,
-    staleTime: 1000 * 60 * 5, // 5 minutes
+    staleTime: 0,
     retry: 1,
     refetchOnWindowFocus: false,
     refetchOnMount: true,
+    refetchOnReconnect: true,
   });
 
   const { data: cartData } = useQuery({
     queryKey: ["cart"],
     queryFn: fetchCart,
-    staleTime: 1000 * 60,
+    // staleTime: 1000 * 60,
+    staleTime: 0,
   });
 
   const { data: productsData } = useQuery({
