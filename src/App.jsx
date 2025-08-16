@@ -5,6 +5,7 @@ import defaultOptions from "./configs/reactQuery";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import Layout from "./pages/Layout";
 import { Container } from "@mui/material";
+import { ToastProvider } from "./contexts/ToastContext";
 
 function App() {
   //create client to use reactQuery
@@ -13,20 +14,22 @@ function App() {
   });
   return (
     <QueryClientProvider client={queryClient}>
-      <Container
-        maxWidth="100%"
-        sx={{
-          width: "100%",
-          maxWidth: "100%",
-          boxSizing: "border-box",
-          overflow: "hidden",
-        }}
-      >
-        <Layout>
-          <Router />
-        </Layout>
-      </Container>
-      <ReactQueryDevtools />
+      <ToastProvider>
+        <Container
+          maxWidth="100%"
+          sx={{
+            width: "100%",
+            maxWidth: "100%",
+            boxSizing: "border-box",
+            overflow: "hidden",
+          }}
+        >
+          <Layout>
+            <Router />
+          </Layout>
+        </Container>
+        <ReactQueryDevtools />
+      </ToastProvider>
     </QueryClientProvider>
   );
 }

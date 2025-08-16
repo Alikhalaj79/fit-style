@@ -19,10 +19,12 @@ import {
 } from "@mui/material";
 import { ArrowBack } from "@mui/icons-material";
 import { logOutUser, getUserProfile } from "../services/users";
+import { useToast } from "../contexts/ToastContext";
 
 const UserPage = () => {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
+  const { showToast } = useToast();
   const [tabValue, setTabValue] = useState(0);
   const [openModal, setOpenModal] = useState(false);
   const [formData, setFormData] = useState({
@@ -45,6 +47,9 @@ const UserPage = () => {
   const logoutMutation = useMutation({
     mutationFn: logOutUser,
     onSuccess: () => {
+      // Show success toast for logout
+      showToast(" شما با موفقیت از حساب کاربری خارج شدید ", "success");
+
       // Clear any stored user data
       localStorage.removeItem("user");
       sessionStorage.clear();
@@ -57,6 +62,7 @@ const UserPage = () => {
     },
     onError: (error) => {
       console.error("خطا در خروج از حساب:", error);
+      showToast("خطا در خروج از حساب کاربری", "error");
     },
   });
 

@@ -22,6 +22,7 @@ import { checkOtp, sendOtp } from "../../../../services/auth";
 import { useNavigate } from "react-router-dom";
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import { getUserProfile } from "../../../../services/users";
+import { useToast } from "../../../../contexts/ToastContext";
 
 const cacheRtl = createCache({
   key: "muirtl",
@@ -45,27 +46,30 @@ const CheckOtpForm = ({
   const [resendDisabled, setResendDisabled] = useState(true); // handle resend button disable
 
   const queryClient = useQueryClient();
+  const { showToast } = useToast();
   // Use mutation for login
   const loginMutation = useMutation({
     mutationFn: ({ mobile, code }) => checkOtp(mobile, code),
     onSuccess: async (data) => {
       if (data.response) {
+        // Show success toast for login
+        showToast(" شما با موفقیت وارد حساب کاربری خود شدید ", "success");
 
-          // Fetch profile directly
-          const profileData = await getUserProfile();
-          console.log("Profile data after login:", profileData);
+        // Fetch profile directly
+        const profileData = await getUserProfile();
+        console.log("Profile data after login:", profileData);
 
-          // Check if profile was successfully fetched
-          if (profileData && profileData.data) {
-            // Invalidate queries to force refetch
-            await queryClient.invalidateQueries({ queryKey: ["profile"] });
-            await queryClient.invalidateQueries({ queryKey: ["cart"] });
-            
+        // Check if profile was successfully fetched
+        if (profileData && profileData.data) {
+          // Invalidate queries to force refetch
+          await queryClient.invalidateQueries({ queryKey: ["profile"] });
+          await queryClient.invalidateQueries({ queryKey: ["cart"] });
         }
       }
     },
     onError: (error) => {
       console.log(error);
+      showToast("خطا در ورود به حساب کاربری", "error");
     },
   });
 
