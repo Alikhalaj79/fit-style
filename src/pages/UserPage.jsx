@@ -45,8 +45,14 @@ const UserPage = () => {
   const logoutMutation = useMutation({
     mutationFn: logOutUser,
     onSuccess: () => {
+      // Clear any stored user data
+      localStorage.removeItem("user");
+      sessionStorage.clear();
+
+      // Invalidate profile queries to force refetch (same as login logic)
       queryClient.invalidateQueries({ queryKey: ["profile"] });
-      queryClient.removeQueries({ queryKey: ["profile"] });
+
+      // Navigate to login page
       navigate("/login");
     },
     onError: (error) => {
@@ -154,7 +160,7 @@ const UserPage = () => {
             mb={2}
             sx={{ textAlign: "center" }}
           >
-             {user?.data?.data?.user?.mobile }
+            {user?.data?.data?.user?.mobile}
           </Typography>
           <Stack spacing={1}>
             {user?.fullName && (
@@ -172,7 +178,6 @@ const UserPage = () => {
                 ایمیل: {user.email}
               </Typography>
             )}
-           
           </Stack>
           {hasIncompleteInfo && (
             <Button
@@ -216,7 +221,6 @@ const UserPage = () => {
             )}
           </Button>
         </Paper>
-        
       </Box>
 
       {/* Modal for Completing Profile */}
