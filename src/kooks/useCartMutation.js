@@ -6,7 +6,7 @@ import {
   removeFromCart,
 } from "../services/cartApi";
 
-export const useCartMutations = ({ setPendingProductId }) => {
+export const useCartMutations = ({ setPendingProductId, setLoadingAction }) => {
   const queryClient = useQueryClient();
 
   const updateCartOptimistically = (productId, updaterFn) => {
@@ -44,6 +44,7 @@ export const useCartMutations = ({ setPendingProductId }) => {
       onSettled: () => {
         queryClient.invalidateQueries({ queryKey: ["cart"] });
         setPendingProductId(null);
+        setLoadingAction(null);
       },
     }),
 
@@ -68,6 +69,7 @@ export const useCartMutations = ({ setPendingProductId }) => {
       onSettled: () => {
         queryClient.invalidateQueries({ queryKey: ["cart"] });
         setPendingProductId(null);
+        setLoadingAction(null);
       },
     }),
 

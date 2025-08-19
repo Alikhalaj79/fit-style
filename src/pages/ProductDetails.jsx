@@ -1,27 +1,52 @@
-import { useState } from "react";
-import { useParams } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import {
   Box,
   Container,
   Grid,
   Typography,
   Button,
-  Divider,
   CircularProgress,
   Alert,
+  IconButton,
+  Chip,
+  Breadcrumbs,
+  Link,
   Paper,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
 } from "@mui/material";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { fetchProductById, getImageUrl } from "../services/productsApi";
-import { addToCart } from "../services/cartApi";
+import AddIcon from "@mui/icons-material/Add";
+import RemoveIcon from "@mui/icons-material/Remove";
+import DeleteIcon from "@mui/icons-material/Delete";
+import ZoomInIcon from "@mui/icons-material/ZoomIn";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  fetchProductById,
+  getImageUrl,
+  convertPriceToPersian,
+} from "../services/productsApi";
+import { fetchCart } from "../services/cartApi";
+import { useCartMutations } from "../kooks/useCartMutation";
+import { getUserProfile } from "../services/users";
+import ImageModal from "../components/templates/layout/ImageModal";
+import SimilarProducts from "../components/templates/homePage/SimilarProducts";
 
 const ProductDetails = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const [selectedImage, setSelectedImage] = useState(0);
 
-  // دریافت اطلاعات محصول
+  const [selectedImage, setSelectedImage] = useState(0);
+  const [openLoginModal, setOpenLoginModal] = useState(false);
+  const [openImageModal, setOpenImageModal] = useState(false);
+  const [loadingAction, setLoadingAction] = useState(null); // "add" | "increase" | "decrease" | "remove"
+  const [pendingProductId, setPendingProductId] = useState(null);
+
+  // Get product information
   const {
     data: product,
     isLoading,
@@ -31,13 +56,95 @@ const ProductDetails = () => {
     queryFn: () => fetchProductById(id),
   });
 
-  // موتاسیون برای اضافه کردن به سبد خرید
-  const addToCartMutation = useMutation({
-    mutationFn: addToCart,
-    onSuccess: () => {
-      queryClient.invalidateQueries(["cart"]);
-    },
+  // Get cart data
+  const { data: cartData, isFetching } = useQuery({
+    queryKey: ["cart"],
+    queryFn: fetchCart,
+    staleTime: 1000 * 60,
   });
+
+  const { addMutation, increaseMutation, decreaseMutation, removeMutation } =
+    useCartMutations({
+      setPendingProductId,
+      setLoadingAction,
+    });
+
+  // Define productData before use
+  const productData = product?.data?.product;
+
+  const productInCart = cartData?.items?.find(
+    (item) => item.productId._id === productData?._id
+  );
+
+  const isPending = pendingProductId === productData?._id;
+
+  // Reset loadingAction when pendingProductId becomes null
+  useEffect(() => {
+    if (!pendingProductId) {
+      setLoadingAction(null);
+    }
+  }, [pendingProductId]);
+
+  const handleAddToCart = async () => {
+    setLoadingAction("add");
+    try {
+      const profileData = queryClient.getQueryData(["profile"]);
+
+      if (!profileData?.data?.data?.user) {
+        const response = await getUserProfile();
+        if (!response?.data?.data?.user) {
+          setOpenLoginModal(true);
+          setLoadingAction(null);
+          return;
+        }
+        // Update profile data in cache
+        queryClient.setQueryData(["profile"], response);
+      }
+
+      addMutation.mutate({ productId: productData._id, quantity: 1 });
+    } catch (error) {
+      setLoadingAction(null);
+      setOpenLoginModal(true);
+    }
+  };
+
+  const handleIncrease = () => {
+    setLoadingAction("increase");
+    increaseMutation.mutate({
+      productId: productData._id,
+      quantity: productInCart.quantity,
+    });
+  };
+
+  const handleDecrease = () => {
+    setLoadingAction("decrease");
+    decreaseMutation.mutate({
+      productId: productData._id,
+      quantity: productInCart.quantity,
+    });
+  };
+
+  const handleRemove = () => {
+    setLoadingAction("remove");
+    removeMutation.mutate(productData._id);
+  };
+
+  const handleCloseLoginModal = () => {
+    setOpenLoginModal(false);
+  };
+
+  const handleNavigateToLogin = () => {
+    navigate("/login");
+    handleCloseLoginModal();
+  };
+
+  const handleOpenImageModal = () => {
+    setOpenImageModal(true);
+  };
+
+  const handleCloseImageModal = () => {
+    setOpenImageModal(false);
+  };
 
   if (isLoading) {
     return (
@@ -45,116 +152,135 @@ const ProductDetails = () => {
         display="flex"
         justifyContent="center"
         alignItems="center"
-        minHeight="80vh"
+        minHeight="60vh"
       >
-        <CircularProgress />
+        <CircularProgress size={40} />
       </Box>
     );
   }
 
   if (error) {
     return (
-      <Alert severity="error" sx={{ mt: 2 }}>
-        خطا در دریافت اطلاعات محصول
-      </Alert>
+      <Container maxWidth="lg" sx={{ py: 3 }}>
+        <Alert severity="error">خطا در دریافت اطلاعات محصول</Alert>
+      </Container>
     );
   }
 
   if (!product?.data?.product) {
     return (
-      <Alert severity="warning" sx={{ mt: 2 }}>
-        محصول مورد نظر یافت نشد
-      </Alert>
+      <Container maxWidth="lg" sx={{ py: 3 }}>
+        <Alert severity="warning">محصول مورد نظر یافت نشد</Alert>
+      </Container>
     );
   }
 
-  const productData = product.data.product;
-
-  const fixImagePath = (path) => {
-    if (!path) return null;
-
-    // همیشه به جلو / تبدیل کن
-    let fixedPath = path.replace(/\\/g, "/");
-
-    // اگه شامل upload هست، فقط از upload به بعد نگه دار
-    const uploadIndex = fixedPath.indexOf("/upload/");
-    if (uploadIndex !== -1) {
-      fixedPath = fixedPath.substring(uploadIndex + 1); // از upload به بعد
-    }
-
-    return fixedPath;
-  };
-
-  // بررسی وجود تصاویر
   const productImages = productData.images
     ? Array.isArray(productData.images)
-      ? productData.images.map((img) => {
-          const fixedPath = fixImagePath(img);
-          return `http://localhost:3000/${fixedPath}`;
-        })
-      : [`http://localhost:3000/${fixImagePath(productData.images)}`]
+      ? productData.images.map((img) => getImageUrl(img))
+      : [getImageUrl(productData.images)]
     : [];
+
   const mainImage = productImages[selectedImage] || "";
 
-  console.log("Product Images:", productImages);
-  console.log("Main Image:", mainImage);
-
-  const handleAddToCart = () => {
-    addToCartMutation.mutate(productData.id);
-  };
-
   return (
-    <Container
-      maxWidth="lg"
-      sx={{ py: 8, minHeight: "80vh", px: { xs: 1, md: 2 } }}
-    >
+    <Container maxWidth="lg" sx={{ py: 4 }}>
+      {/* Breadcrumbs */}
+      <Breadcrumbs sx={{ mb: 3, color: "#666" }}>
+        <Link
+          color="inherit"
+          href="#"
+          onClick={(e) => {
+            e.preventDefault();
+            navigate("/");
+          }}
+          sx={{ cursor: "pointer", "&:hover": { color: "#FF6B00" } }}
+        >
+          صفحه اصلی
+        </Link>
+        <Link
+          color="inherit"
+          href="#"
+          onClick={(e) => {
+            e.preventDefault();
+            navigate("/shop");
+          }}
+          sx={{ cursor: "pointer", "&:hover": { color: "#FF6B00" } }}
+        >
+          فروشگاه
+        </Link>
+        <Typography color="text.primary">{productData.title}</Typography>
+      </Breadcrumbs>
+
+      {/* Product Box */}
       <Paper
         elevation={0}
         sx={{
-          borderRadius: 2,
+          borderRadius: 3,
           border: "1px solid #e0e0e0",
           backgroundColor: "#fff",
           overflow: "hidden",
-          minHeight: "50vh",
+          mb: 4,
         }}
       >
-        <Grid container sx={{ height: "100%" }}>
-          {/* تصاویر محصول */}
-          <Grid item xs={12} md={6} sx={{ height: "100%" }}>
-            <Box
-              sx={{
-                p: 2,
-                height: "100%",
-                display: "flex",
-                flexDirection: "column",
-              }}
-            >
+        <Grid container>
+          {/* Product Images */}
+          <Grid item xs={12} md={6}>
+            <Box sx={{ p: 3 }}>
+              {/* Main Image */}
               {mainImage && (
-                <Box
-                  component="img"
-                  src={mainImage}
-                  alt={productData.title}
-                  sx={{
-                    width: "100%",
-                    height: { xs: 300, sm: 400, md: "60%" },
-                    objectFit: "contain",
-                    mb: 2,
-                    borderRadius: 1,
-                  }}
-                />
+                <Box sx={{ position: "relative" }}>
+                  <Box
+                    component="img"
+                    src={mainImage}
+                    alt={productData.title}
+                    onClick={handleOpenImageModal}
+                    sx={{
+                      width: "100%",
+                      height: { xs: 300, sm: 400 },
+                      objectFit: "contain",
+                      mb: 2,
+                      borderRadius: 2,
+                      backgroundColor: "#fafafa",
+                      cursor: "pointer",
+                      transition: "transform 0.2s ease",
+                      "&:hover": {
+                        transform: "scale(1.02)",
+                      },
+                    }}
+                  />
+                  <IconButton
+                    onClick={handleOpenImageModal}
+                    sx={{
+                      position: "absolute",
+                      top: 8,
+                      right: 8,
+                      backgroundColor: "rgba(255, 255, 255, 0.9)",
+                      color: "#666",
+                      "&:hover": {
+                        backgroundColor: "rgba(255, 255, 255, 1)",
+                        color: "#FF6B00",
+                      },
+                    }}
+                  >
+                    <ZoomInIcon />
+                  </IconButton>
+                </Box>
               )}
-              {productImages && productImages.length > 0 && (
-                <Grid container spacing={1} sx={{ mt: "auto" }}>
+
+              {/* Thumbnail Images */}
+              {productImages && productImages.length > 1 && (
+                <Grid container spacing={1}>
                   {productImages.map((image, index) => (
-                    <Grid item key={index} xs={4} sm={3}>
+                    <Grid item key={index} xs={3}>
                       <Box
                         component="img"
                         src={image}
-                        alt={`تصویر ${index + 1}`}
+                        alt={`Image ${index + 1}`}
                         onClick={() => setSelectedImage(index)}
                         sx={{
                           width: "100%",
-                          height: { xs: 80, sm: 100 },
+                          height: 80,
                           objectFit: "cover",
                           cursor: "pointer",
                           borderRadius: 1,
@@ -165,7 +291,7 @@ const ProductDetails = () => {
                           transition: "all 0.2s ease",
                           "&:hover": {
                             border: "2px solid #FF6B00",
-                            transform: "scale(1.02)",
+                            transform: "scale(1.05)",
                           },
                         }}
                       />
@@ -176,89 +302,322 @@ const ProductDetails = () => {
             </Box>
           </Grid>
 
-          {/* اطلاعات محصول */}
-          <Grid item xs={12} md={6} sx={{ height: "100%" }}>
+          {/* Product Information */}
+          <Grid item xs={12} md={6}>
             <Box
               sx={{
-                p: 3,
+                p: 4,
                 height: "100%",
                 display: "flex",
                 flexDirection: "column",
+                justifyContent: "center",
               }}
             >
+              {/* Category */}
+              {productData.category?.title && (
+                <Chip
+                  label={productData.category.title}
+                  size="small"
+                  sx={{
+                    backgroundColor: "#f5f5f5",
+                    color: "#666",
+                    mb: 3,
+                    alignSelf: "flex-start",
+                  }}
+                />
+              )}
+
+              {/* Title */}
               <Typography
-                variant="h4"
-                component="h4"
-                gutterBottom
+                variant="h3"
+                component="h1"
                 sx={{
-                  fontSize: { xs: "1.5rem", sm: "2rem", md: "2.5rem" },
+                  fontSize: { xs: "1.75rem", sm: "2.25rem", md: "2.5rem" },
                   color: "#333",
+                  fontWeight: 700,
+                  mb: 2,
+                  textAlign: "center",
+                  lineHeight: 1.2,
                 }}
               >
                 {productData.title}
               </Typography>
 
+              {/* Price */}
               <Typography
-                variant="subtitle1"
-                color="text.secondary"
-                gutterBottom
+                variant="h4"
                 sx={{
-                  fontSize: { xs: "0.875rem", sm: "1rem" },
-                  color: "#666",
-                }}
-              >
-                {productData.summary}
-              </Typography>
-
-              <Typography
-                variant="h5"
-                gutterBottom
-                sx={{
-                  fontSize: { xs: "1.25rem", sm: "1.5rem" },
                   color: "#FF6B00",
                   fontWeight: "bold",
-                  mt: 2,
+                  mb: 3,
+                  textAlign: "center",
                 }}
               >
-                {productData.price ? productData.price.toLocaleString() : "0"}{" "}
-                تومان
+                {convertPriceToPersian(productData.price || 0)} تومان
               </Typography>
 
-              <Typography
-                variant="body1"
-                paragraph
-                sx={{
-                  fontSize: { xs: "0.875rem", sm: "1rem" },
-                  lineHeight: 1.8,
-                  color: "#666",
-                  mt: 3,
-                  flex: 1,
-                }}
-              >
-                {productData.description}
-              </Typography>
-
-              <Box display="flex" gap={2} mt="auto">
-                <Button
-                  variant="contained"
-                  startIcon={<ShoppingCartIcon />}
-                  onClick={handleAddToCart}
+              {/* Summary */}
+              {productData.summary && (
+                <Typography
+                  variant="body1"
                   sx={{
-                    flex: 1,
-                    borderRadius: 1,
-                    py: 1.5,
-                    backgroundColor: "#FF6B00",
-                    "&:hover": { backgroundColor: "#E65A00" },
-                    fontSize: { xs: "0.875rem", sm: "1rem" },
+                    color: "#666",
+                    mb: 4,
+                    lineHeight: 1.8,
+                    textAlign: "center",
+                    fontSize: "1.1rem",
                   }}
                 >
-                  افزودن به سبد خرید
-                </Button>
+                  {productData.summary}
+                </Typography>
+              )}
+
+              {/* Description */}
+              {productData.description && (
+                <Box sx={{ mb: 4 }}>
+                  <Typography
+                    variant="h6"
+                    sx={{
+                      color: "#333",
+                      mb: 2,
+                      textAlign: "center",
+                      fontWeight: 600,
+                    }}
+                  >
+                    {/* Product Description */}
+                  </Typography>
+                  <Typography
+                    variant="body1"
+                    sx={{
+                      lineHeight: 2,
+                      color: "#666",
+                      fontSize: "1rem",
+                      textAlign: "justify",
+                    }}
+                  >
+                    {productData.description}
+                  </Typography>
+                </Box>
+              )}
+
+              {/* دکمه‌های سبد خرید */}
+              <Box sx={{ mb: 4, textAlign: "center" }}>
+                {isPending ? (
+                  <Button
+                    fullWidth
+                    variant="outlined"
+                    disabled
+                    sx={{
+                      maxWidth: 400,
+                      opacity: 0.6,
+                      padding: "12px",
+                      borderRadius: 2,
+                      borderColor: "#FF6B00",
+                      color: "#FF6B00",
+                    }}
+                  >
+                    <CircularProgress size={20} />
+                  </Button>
+                ) : productInCart ? (
+                  <Box
+                    sx={{
+                      display: "flex",
+                      justifyContent: "center",
+                      alignItems: "center",
+                      border: "1px solid #e0e0e0",
+                      borderRadius: 2,
+                      width: "100%",
+                      maxWidth: 400,
+                      mx: "auto",
+                      p: 1,
+                      backgroundColor: "#fff",
+                    }}
+                  >
+                    <IconButton
+                      onClick={handleIncrease}
+                      color="primary"
+                      disabled={loadingAction === "increase"}
+                      sx={{ color: "#FF6B00" }}
+                    >
+                      {loadingAction === "increase" ? (
+                        <CircularProgress size={20} />
+                      ) : (
+                        <AddIcon />
+                      )}
+                    </IconButton>
+
+                    <Typography
+                      variant="body1"
+                      fontWeight={600}
+                      sx={{
+                        minWidth: 60,
+                        textAlign: "center",
+                        color: "#333",
+                        fontSize: "1.1rem",
+                      }}
+                    >
+                      {productInCart?.quantity}
+                    </Typography>
+
+                    <IconButton
+                      onClick={
+                        productInCart?.quantity === 1
+                          ? handleRemove
+                          : handleDecrease
+                      }
+                      color={
+                        productInCart?.quantity === 1 ? "error" : "primary"
+                      }
+                      disabled={
+                        loadingAction === "remove" ||
+                        loadingAction === "decrease"
+                      }
+                      sx={{
+                        color:
+                          productInCart?.quantity === 1 ? "#d32f2f" : "#FF6B00",
+                      }}
+                    >
+                      {loadingAction === "remove" ||
+                      loadingAction === "decrease" ? (
+                        <CircularProgress size={20} />
+                      ) : productInCart?.quantity === 1 ? (
+                        <DeleteIcon />
+                      ) : (
+                        <RemoveIcon />
+                      )}
+                    </IconButton>
+                  </Box>
+                ) : (
+                  <Button
+                    fullWidth
+                    variant="contained"
+                    size="medium"
+                    onClick={handleAddToCart}
+                    disabled={loadingAction === "add"}
+                    sx={{
+                      maxWidth: 400,
+                      borderRadius: 2,
+                      backgroundColor: "#FF6B00",
+                      color: "#fff",
+                      fontWeight: 600,
+                      textTransform: "none",
+                      py: 1.5,
+                      px: 3,
+                      "&:hover": {
+                        backgroundColor: "#E65A00",
+                        transform: "translateY(-1px)",
+                        boxShadow: "0 4px 8px rgba(255, 107, 0, 0.3)",
+                      },
+                      transition: "all 0.2s ease",
+                      "& .MuiButton-startIcon": {
+                        marginRight: 1,
+                      },
+                    }}
+                    startIcon={<ShoppingCartIcon />}
+                  >
+                    {loadingAction === "add" ? (
+                      <CircularProgress size={20} sx={{ color: "#fff" }} />
+                    ) : (
+                      "افزودن به سبد خرید"
+                    )}
+                  </Button>
+                )}
               </Box>
             </Box>
           </Grid>
         </Grid>
       </Paper>
+
+      {/* Login Modal */}
+      <Dialog
+        open={openLoginModal}
+        onClose={handleCloseLoginModal}
+        sx={{
+          "& .MuiDialog-paper": {
+            borderRadius: 2,
+            padding: 2,
+            maxWidth: 400,
+            width: "90%",
+          },
+        }}
+      >
+        <DialogTitle
+          sx={{
+            textAlign: "center",
+            color: "#222222",
+            fontWeight: "bold",
+            fontSize: "1.2rem",
+          }}
+        >
+          ورود به حساب کاربری
+        </DialogTitle>
+        <DialogContent>
+          <Typography
+            variant="body1"
+            sx={{
+              textAlign: "center",
+              color: "#666",
+              mt: 1,
+            }}
+          >
+            برای افزودن محصول به سبد خرید، لطفاً ابتدا وارد حساب کاربری خود
+            شوید.
+          </Typography>
+        </DialogContent>
+        <DialogActions
+          sx={{
+            justifyContent: "center",
+            gap: 1,
+            padding: 2,
+          }}
+        >
+          <Button
+            onClick={handleCloseLoginModal}
+            variant="outlined"
+            sx={{
+              color: "#666",
+              borderColor: "#666",
+              "&:hover": {
+                borderColor: "#222222",
+                color: "#222222",
+              },
+            }}
+          >
+            انصراف
+          </Button>
+          <Button
+            onClick={handleNavigateToLogin}
+            variant="contained"
+            sx={{
+              bgcolor: "#FF6B00",
+              color: "#fff",
+              "&:hover": { backgroundColor: "#E65A00" },
+            }}
+          >
+            ورود به حساب
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Image Modal */}
+      <ImageModal
+        open={openImageModal}
+        onClose={handleCloseImageModal}
+        imageSrc={mainImage}
+        imageAlt={productData?.title || "Product Image"}
+        images={productImages}
+        currentImageIndex={selectedImage}
+        onImageChange={setSelectedImage}
+      />
+
+      {/* Similar Products */}
+      {productData && (
+        <SimilarProducts
+          categoryId={productData.category?._id || ""}
+          currentProductId={productData._id}
+          limit={8}
+        />
+      )}
     </Container>
   );
 };
