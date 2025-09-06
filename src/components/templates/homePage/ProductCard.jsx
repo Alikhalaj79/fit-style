@@ -33,10 +33,17 @@ import {
   removeFromFavorite,
   fetchFavoriteProducts,
 } from "../../../services/favoriteApi";
+import { useOptimisticFavorites } from "../../../kooks/useOptimisticFavorites";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { getUserProfile } from "../../../services/users";
 
-const ProductCard = ({ product, variant }) => {
+const ProductCard = ({
+  product,
+  variant,
+  isProductFavorite: externalIsProductFavorite,
+  onFavoriteClick: externalOnFavoriteClick,
+  favoriteItemId,
+}) => {
   const [openImage, setOpenImage] = useState(false);
   const [openLoginModal, setOpenLoginModal] = useState(false);
   const [loadingAction, setLoadingAction] = useState(null); // "add" | "increase" | "decrease" | "remove"
@@ -55,26 +62,30 @@ const ProductCard = ({ product, variant }) => {
   const { addMutation, increaseMutation, decreaseMutation, removeMutation } =
     useCartMutations({ setPendingProductId });
 
-  const { data: favoriteStatus } = useQuery({
-    queryKey: ["favorite"],
-    queryFn: fetchFavoriteProducts,
-  });
+  // Use optimistic favorites hook
+  const {
+    optimisticFavorites,
+    addToFavoriteMutation,
+    removeFromFavoriteMutation,
+    isProductFavorite: optimisticIsProductFavorite,
+  } = useOptimisticFavorites();
 
-  const addToFavoriteMutation = useMutation({
-    mutationFn: addToFavorite,
-    onSuccess: () => {
-      queryClient.invalidateQueries(["favorite"]);
-      setIsFavorite(true);
-    },
-  });
+  // Check if current product is in favorites
+  const internalIsProductFavorite = optimisticIsProductFavorite(product.id);
 
-  const removeFromFavoriteMutation = useMutation({
-    mutationFn: removeFromFavorite,
-    onSuccess: () => {
-      queryClient.invalidateQueries(["favorite"]);
-      setIsFavorite(false);
-    },
-  });
+  // Use external function if provided, otherwise use internal logic
+  const isProductFavorite = externalIsProductFavorite
+    ? externalIsProductFavorite(product.id)
+    : internalIsProductFavorite;
+
+  // لاگ برای دیباگ - ID کارد
+  if (favoriteItemId) {
+    console.log("ProductCard - Favorite Item ID:", favoriteItemId);
+    console.log("ProductCard - Product ID:", product.id);
+    console.log("ProductCard - Product:", product);
+  }
+
+  // Optimistic mutations are now handled by useOptimisticFavorites hook
 
   const handleOpenImage = () => setOpenImage(true);
   const handleCloseImage = () => setOpenImage(false);
@@ -151,10 +162,29 @@ const ProductCard = ({ product, variant }) => {
 
   const handleFavoriteClick = (e) => {
     e.stopPropagation();
-    if (isFavorite) {
-      removeFromFavoriteMutation.mutate(product.id);
+
+    // لاگ برای دیباگ - کلیک روی قلب
+    console.log("=== Favorite Click Debug ===");
+    console.log("Product ID:", product.id);
+    console.log("Product _ID:", product._id);
+    console.log("Favorite Item ID:", favoriteItemId);
+    console.log("Is Product Favorite:", isProductFavorite);
+    console.log("Has External Function:", !!externalOnFavoriteClick);
+    console.log("===========================");
+
+    // Use external function if provided, otherwise use internal logic
+    if (externalOnFavoriteClick) {
+      // در Favorite page، _id محصول رو ارسال می‌کنیم
+      const idToUse = product._id || product.id;
+      console.log("Using ID for removal:", idToUse);
+      console.log("Product object:", product);
+      externalOnFavoriteClick(idToUse);
     } else {
-      addToFavoriteMutation.mutate(product.id);
+      if (isProductFavorite) {
+        removeFromFavoriteMutation.mutate(product.id);
+      } else {
+        addToFavoriteMutation.mutate(product.id);
+      }
     }
   };
 
@@ -236,7 +266,7 @@ const ProductCard = ({ product, variant }) => {
             },
           }}
         >
-          {isFavorite ? (
+          {isProductFavorite ? (
             <FavoriteIcon sx={{ color: "#FF6F00", fontSize: 20 }} />
           ) : (
             <FavoriteBorderIcon sx={{ color: "#757575", fontSize: 20 }} />

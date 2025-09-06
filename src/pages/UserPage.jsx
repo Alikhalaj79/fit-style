@@ -48,7 +48,7 @@ const UserPage = () => {
     mutationFn: logOutUser,
     onSuccess: () => {
       // Show success toast for logout
-      showToast(" شما با موفقیت از حساب کاربری خارج شدید ", "success");
+      showToast(" شما با موفقیت از حساب کاربری خارج شدید ط", "success");
 
       // Clear any stored user data
       localStorage.removeItem("user");

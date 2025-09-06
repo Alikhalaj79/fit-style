@@ -56,33 +56,33 @@ const Shop = () => {
     queryKey: ["products"],
     queryFn: async () => {
       try {
-        console.log(
-          "Fetching products from:",
-          "https://clothing-store.liara.run/products/all"
-        );
+        // console.log(
+        //   "Fetching products from:",
+        //   "https://clothing-store.liara.run/products/all"
+        // );
         const response = await getProducts();
-        console.log("Raw API Response:", response);
-        console.log("Response URL:", response.config?.url);
-        console.log("Response Base URL:", response.config?.baseURL);
-        console.log("Returning Data:", response.data);
+        // console.log("Raw API Response:", response);
+        // console.log("Response URL:", response.config?.url);
+        // console.log("Response Base URL:", response.config?.baseURL);
+        // console.log("Returning Data:", response.data);
         return response.data;
       } catch (error) {
-        console.error("Error fetching products:", {
-          message: error.message,
-          status: error.response?.status,
-          url: error.config?.url,
-          baseURL: error.config?.baseURL,
-        });
+        // console.error("Error fetching products:", {
+        //   message: error.message,
+        //   status: error.response?.status,
+        //   url: error.config?.url,
+        //   baseURL: error.config?.baseURL,
+        // });
         throw error;
       }
     },
   });
 
   // لاگ برای دیباگ
-  console.log("Products Data (raw):", productsData);
-  console.log("Products Data Inner:", productsData?.data);
-  console.log("Products Data Products:", productsData?.data?.products);
-  console.log("Products Error:", productsError);
+  // console.log("Products Data (raw):", productsData);
+  // console.log("Products Data Inner:", productsData?.data);
+  // console.log("Products Data Products:", productsData?.data?.products);
+  // console.log("Products Error:", productsError);
 
   // استخراج دسته‌بندی‌ها از محصولات
   const categories = useMemo(() => {
@@ -105,7 +105,7 @@ const Shop = () => {
       }
     });
 
-    console.log("Extracted Categories:", uniqueCategories);
+    // console.log("Extracted Categories:", uniqueCategories);
     return uniqueCategories;
   }, [productsData]);
 
@@ -115,7 +115,7 @@ const Shop = () => {
       ? productsData.data.products
       : [];
     if (!products.length) {
-      console.log("No products, returning empty array");
+      // console.log("No products, returning empty array");
       return [];
     }
 
@@ -146,7 +146,7 @@ const Shop = () => {
       return matchesCategory && matchesSearch;
     });
 
-    console.log("Filtered Products:", filteredProducts);
+    // console.log("Filtered Products:", filteredProducts);
 
     // گروه‌بندی محصولات بر اساس دسته‌بندی
     const groups = categories
@@ -155,7 +155,7 @@ const Shop = () => {
           (product) => product.category.id === category.id
         );
         if (categoryProducts.length === 0) {
-          console.log(`No products for category ${category.name}`);
+          // console.log(`No products for category ${category.name}`);
           return null;
         }
 
@@ -171,7 +171,7 @@ const Shop = () => {
       })
       .filter((group) => group !== null);
 
-    console.log("Grouped Products:", groups);
+    // console.log("Grouped Products:", groups);
     return groups;
   }, [productsData, categories, filters, sortBy, categoryPage]);
 
@@ -193,7 +193,7 @@ const Shop = () => {
   };
 
   // لاگ قبل از رندر
-  console.log("Rendering groupedProducts:", groupedProducts);
+  // console.log("Rendering groupedProducts:", groupedProducts);
 
   return (
     <Container maxWidth="lg" sx={{ py: 6 }}>

@@ -33,7 +33,7 @@ import { fetchCart } from "../services/cartApi";
 import { useCartMutations } from "../kooks/useCartMutation";
 import { getUserProfile } from "../services/users";
 import ImageModal from "../components/templates/layout/ImageModal";
-import SimilarProducts from "../components/templates/homePage/SimilarProducts";
+// import SimilarProducts from "../components/templates/homePage/SimilarProducts";
 
 const ProductDetails = () => {
   const { id } = useParams();
@@ -611,13 +611,13 @@ const ProductDetails = () => {
       />
 
       {/* Similar Products */}
-      {productData && (
+      {/* {productData && (
         <SimilarProducts
           categoryId={productData.category?._id || ""}
           currentProductId={productData._id}
           limit={8}
         />
-      )}
+      )} */}
     </Container>
   );
 };
