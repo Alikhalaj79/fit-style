@@ -96,6 +96,11 @@ const ProductCard = ({
 
   const isPending = pendingProductId === product.id;
 
+  // Stock count logic
+  const stockCount = product.count || 0;
+  const isOutOfStock = stockCount === 0;
+  const isLowStock = stockCount > 0 && stockCount < 5;
+
   const handleAddToCart = async () => {
     setLoadingAction("add");
     try {
@@ -203,14 +208,27 @@ const ProductCard = ({
           overflow: "hidden",
           transition: "all 0.3s ease-in-out",
           "&:hover": {
-            transform: variant === "cart" ? "none" : "translateY(-4px)",
+            transform:
+              variant === "cart"
+                ? "none"
+                : isOutOfStock
+                ? "none"
+                : "translateY(-4px)",
             boxShadow:
               variant === "cart"
                 ? "0 2px 6px rgba(0,0,0,0.15)"
+                : isOutOfStock
+                ? "0 2px 6px rgba(0, 0, 0, 0.05)"
                 : "0 8px 20px rgba(0, 0, 0, 0.1)",
           },
           backgroundColor:
-            variant === "cart" ? "#fff" : productInCart ? "#FFF8F1" : "#fff",
+            variant === "cart"
+              ? "#fff"
+              : isOutOfStock
+              ? "#fefefe"
+              : productInCart
+              ? "#FFF8F1"
+              : "#fff",
           margin: variant === "cart" ? "0 0 16px 0" : "12px",
           position: "relative",
           display:
@@ -221,6 +239,8 @@ const ProductCard = ({
             variant === "cart" ? { xs: "row", sm: "row", md: "row" } : "row",
           height:
             variant === "cart" ? { xs: "auto", sm: 160, md: 180 } : "auto",
+          cursor: isOutOfStock ? "not-allowed" : "default",
+          opacity: isOutOfStock ? 0.8 : 1,
         }}
       >
         {productInCart && variant !== "cart" && (
@@ -251,8 +271,48 @@ const ProductCard = ({
           </Box>
         )}
 
+        {/* Out of stock overlay */}
+        {isOutOfStock && (
+          <Box
+            sx={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: "rgba(0, 0, 0, 0.15)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              zIndex: 3,
+              borderRadius: variant === "cart" ? 2 : 4,
+              transition: "all 0.2s ease-in-out",
+              pointerEvents: "none",
+            }}
+          >
+            <Typography
+              sx={{
+                color: "#9e9e9e",
+                fontWeight: 500,
+                fontSize: "0.95rem",
+                textAlign: "center",
+                letterSpacing: "0.3px",
+                backgroundColor: "rgba(255, 255, 255, 0.9)",
+                padding: "6px 12px",
+                borderRadius: "16px",
+                border: "1px solid rgba(158, 158, 158, 0.2)",
+                backdropFilter: "blur(8px)",
+                boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
+              }}
+            >
+              ناموجود
+            </Typography>
+          </Box>
+        )}
+
         <IconButton
-          onClick={handleFavoriteClick}
+          onClick={isOutOfStock ? undefined : handleFavoriteClick}
+          disabled={isOutOfStock}
           sx={{
             position: "absolute",
             top: 8,
@@ -261,8 +321,11 @@ const ProductCard = ({
             backgroundColor: "rgba(255, 255, 255, 0.8)",
             backdropFilter: "blur(4px)",
             padding: "4px",
+            opacity: isOutOfStock ? 0.5 : 1,
             "&:hover": {
-              backgroundColor: "rgba(255, 255, 255, 0.9)",
+              backgroundColor: isOutOfStock
+                ? "rgba(255, 255, 255, 0.8)"
+                : "rgba(255, 255, 255, 0.9)",
             },
           }}
         >
@@ -306,7 +369,7 @@ const ProductCard = ({
                   }
                 : "none",
           }}
-          onClick={handleOpenImage}
+          onClick={isOutOfStock ? undefined : handleOpenImage}
         >
           <picture>
             <source
@@ -328,7 +391,11 @@ const ProductCard = ({
                 width: "100%",
                 height: "100%",
                 objectFit: "cover",
-                transition: "transform 0.3s",
+                transition: "all 0.3s ease-in-out",
+                filter: isOutOfStock
+                  ? "grayscale(40%) brightness(0.9)"
+                  : "none",
+                opacity: isOutOfStock ? 0.9 : 1,
               }}
               loading="lazy"
               crossOrigin="anonymous"
@@ -389,20 +456,34 @@ const ProductCard = ({
             >
               {convertPriceToPersian(product.price)} تومان
             </Typography>
+
+            {/* Stock count display */}
+            {isLowStock && variant !== "cart" && (
+              <Typography
+                sx={{
+                  fontSize: "0.8rem",
+                  fontWeight: 600,
+                  color: "#f44336",
+                }}
+              >
+                {stockCount} عدد باقی مانده
+              </Typography>
+            )}
           </Box>
           {variant !== "cart" && (
             <Typography
-              component={Link}
-              to={`/product/${product.id}`}
+              component={isOutOfStock ? "span" : Link}
+              to={isOutOfStock ? undefined : `/product/${product.id}`}
               sx={{
                 fontSize: "0.875rem",
-                color: "#1976d2",
+                color: isOutOfStock ? "#9e9e9e" : "#1976d2",
                 textDecoration: "none",
                 alignSelf: "flex-end",
+                cursor: isOutOfStock ? "not-allowed" : "pointer",
                 "&:hover": {
                   textDecoration: "none",
-                  color: "#1976d2",
-                  fontWeight: 300,
+                  color: isOutOfStock ? "#9e9e9e" : "#1976d2",
+                  fontWeight: isOutOfStock ? "normal" : 300,
                   transition: "all 0.3s ease-in-out",
                 },
               }}
@@ -451,6 +532,29 @@ const ProductCard = ({
             >
               <CircularProgress size={20} />
             </Button>
+          ) : isOutOfStock ? (
+            <Button
+              fullWidth
+              // variant="outlined"
+              disabled
+              sx={{
+                padding: "8px 16px",
+                borderRadius: "12px",
+                color: "#9e9e9e",
+                borderColor: "#e0e0e0",
+                // backgroundColor: "rgba(158, 158, 158, 0.05)",
+                fontSize: "0.9rem",
+                fontWeight: 500,
+                letterSpacing: "0.3px",
+                "&:disabled": {
+                  color: "#9e9e9e",
+                  borderColor: "#e0e0e0",
+                  // backgroundColor: "rgba(158, 158, 158, 0.05)",
+                },
+              }}
+            >
+              ناموجود
+            </Button>
           ) : productInCart ? (
             <Box
               sx={{
@@ -465,7 +569,10 @@ const ProductCard = ({
               <IconButton
                 onClick={handleIncrease}
                 color="primary"
-                disabled={loadingAction === "increase"}
+                disabled={
+                  loadingAction === "increase" ||
+                  productInCart?.quantity >= stockCount
+                }
                 sx={{}}
               >
                 {loadingAction === "increase" ? (
@@ -525,19 +632,20 @@ const ProductCard = ({
           )}
           {variant === "cart" && (
             <Typography
-              component={Link}
-              to={`/product/${product.id}`}
+              component={isOutOfStock ? "span" : Link}
+              to={isOutOfStock ? undefined : `/product/${product.id}`}
               sx={{
                 fontSize: { xs: "0.875rem", sm: "0.875rem", md: "0.9rem" },
-                color: "#757575",
+                color: isOutOfStock ? "#9e9e9e" : "#757575",
                 textDecoration: "none",
                 alignSelf: "flex-end",
                 display: "flex",
                 alignItems: "center",
                 gap: 0.5,
+                cursor: isOutOfStock ? "not-allowed" : "pointer",
                 "&:hover": {
                   textDecoration: "none",
-                  color: "#FF6F00",
+                  color: isOutOfStock ? "#9e9e9e" : "#FF6F00",
                   transition: "all 0.3s ease-in-out",
                 },
               }}
