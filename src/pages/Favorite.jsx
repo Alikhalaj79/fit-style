@@ -40,24 +40,19 @@ const Favorite = () => {
     productTitle: "",
   });
 
+  // Use optimistic favorites hook first
   const {
-    data: favoriteProducts,
+    optimisticFavorites,
+    removeFromFavoriteMutation,
+    favoritesData,
     isLoading,
     error,
-  } = useQuery({
-    queryKey: ["favorite"],
-    queryFn: fetchFavoriteProducts,
-  });
-
-  // Use optimistic favorites hook first
-  const { optimisticFavorites, removeFromFavoriteMutation } =
-    useOptimisticFavorites();
+  } = useOptimisticFavorites();
 
   // Extract items from response if it's an object
-  const items =
-    favoriteProducts?.data?.savedItems?.items || favoriteProducts || [];
-  
-    const clearAllFavoritesMutation = useMutation({
+  const items = favoritesData?.data?.savedItems?.items || favoritesData || [];
+
+  const clearAllFavoritesMutation = useMutation({
     mutationFn: clearAllFavorites,
     onSuccess: () => {
       queryClient.invalidateQueries(["favorite"]);
@@ -73,8 +68,6 @@ const Favorite = () => {
   // Check if current product is in favorites
   // در Favorite page، همه محصولات favorite هستن
   const isProductFavorite = (productId) => {
-
-
     // در Favorite page، همه محصولات favorite هستن
     return true;
   };
@@ -429,7 +422,6 @@ const Favorite = () => {
             }}
           >
             محصولات مورد علاقه پاک شود؟
-          
           </Typography>
         </DialogContent>
         <DialogActions

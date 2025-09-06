@@ -1,4 +1,4 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
 import {
   addToFavorite,
@@ -9,8 +9,16 @@ import {
 export const useOptimisticFavorites = () => {
   const queryClient = useQueryClient();
 
-  // Get current favorites data
-  const favoritesData = queryClient.getQueryData(["favorite"]) || [];
+  // Get favorites data from query
+  const {
+    data: favoritesData = [],
+    isLoading,
+    error,
+  } = useQuery({
+    queryKey: ["favorite"],
+    queryFn: fetchFavoriteProducts,
+    staleTime: 1000 * 60, // 1 minute
+  });
 
   // Manual optimistic state management
   const [optimisticFavorites, setOptimisticFavorites] = useState(favoritesData);
@@ -127,5 +135,8 @@ export const useOptimisticFavorites = () => {
     addToFavoriteMutation,
     removeFromFavoriteMutation,
     isProductFavorite,
+    favoritesData,
+    isLoading,
+    error,
   };
 };

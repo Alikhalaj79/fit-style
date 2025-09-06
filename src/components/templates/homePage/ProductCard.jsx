@@ -62,7 +62,7 @@ const ProductCard = ({
   const { addMutation, increaseMutation, decreaseMutation, removeMutation } =
     useCartMutations({ setPendingProductId });
 
-  // Use optimistic favorites hook
+  // Use optimistic favorites hook only if no external function provided
   const {
     optimisticFavorites,
     addToFavoriteMutation,
