@@ -57,6 +57,7 @@ const AddProductForm = () => {
     tags: [],
     category: "",
     price: "",
+    count: "",
     images: [],
   });
 
@@ -265,7 +266,7 @@ const AddProductForm = () => {
                 {/* Title */}
                 <Grid item="true" size={{ xs: 12, sm: 10, md: 8 }}>
                   <TextField
-                    label="عنوان"
+                    label="عنوان محصول *"
                     fullWidth
                     required
                     name="title"
@@ -277,7 +278,7 @@ const AddProductForm = () => {
                 {/* Summary */}
                 <Grid item="true" size={{ xs: 12, sm: 10, md: 8 }}>
                   <TextField
-                    label="متن محصول"
+                    label="خلاصه محصول *"
                     fullWidth
                     required
                     name="summary"
@@ -289,7 +290,7 @@ const AddProductForm = () => {
                 {/* Description */}
                 <Grid item="true" size={{ xs: 12, sm: 10, md: 8 }}>
                   <TextField
-                    label="توضیحات"
+                    label="توضیحات محصول *"
                     fullWidth
                     multiline
                     rows={4}
@@ -303,11 +304,12 @@ const AddProductForm = () => {
                 {/* Tags */}
                 <Grid item="true" size={{ xs: 12, sm: 10, md: 8 }}>
                   <TextField
-                    label="تگ"
+                    label="تگ‌ها (اختیاری)"
                     fullWidth
                     name="tags"
                     value={formData.tags}
                     onChange={handleChange}
+                    placeholder="تگ‌ها را با کاما جدا کنید"
                   />
                 </Grid>
 
@@ -323,12 +325,24 @@ const AddProductForm = () => {
                 {/* Price */}
                 <Grid item="true" size={{ xs: 12, sm: 10, md: 8 }}>
                   <TextField
-                    label="قیمت"
+                    label="قیمت محصول"
                     fullWidth
-                    required
                     name="price"
                     value={formData.price}
                     onChange={handleChange}
+                  />
+                </Grid>
+
+                {/* Count */}
+                <Grid item="true" size={{ xs: 12, sm: 10, md: 8 }}>
+                  <TextField
+                    label="تعداد موجودی"
+                    fullWidth
+                    type="number"
+                    name="count"
+                    value={formData.count}
+                    onChange={handleChange}
+                    inputProps={{ min: 0 }}
                   />
                 </Grid>
 

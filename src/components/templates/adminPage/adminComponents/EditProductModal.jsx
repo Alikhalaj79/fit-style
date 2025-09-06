@@ -92,6 +92,7 @@ const EditProductModal = ({ openEditModal, onClose, product, onSave }) => {
       adminCategoryId || product?.category?.id || product?.category || "",
     parent: adminCategoryId || product?.category?.id || product?.category || "",
     price: product?.price || "",
+    count: product?.count || "",
   });
 
   // Update formData when admin categories are loaded
@@ -124,6 +125,7 @@ const EditProductModal = ({ openEditModal, onClose, product, onSave }) => {
     tags: useRef(null),
     category: useRef(null),
     price: useRef(null),
+    count: useRef(null),
   };
 
   // Edit product mutation
@@ -257,6 +259,7 @@ const EditProductModal = ({ openEditModal, onClose, product, onSave }) => {
           : [],
         category: formData.category || formData.parent,
         price: parseFloat(formData.price.toString().replace(/[^\d.]/g, "")),
+        count: formData.count ? parseInt(formData.count) : 0,
       };
 
       // If there are new images, create FormData
@@ -448,7 +451,7 @@ const EditProductModal = ({ openEditModal, onClose, product, onSave }) => {
 
           <CacheProvider value={cacheRtl}>
             <TextField
-              label="عنوان"
+              label="عنوان محصول *"
               name="title"
               value={formData.title || ""}
               onChange={handleInputChange}
@@ -459,7 +462,7 @@ const EditProductModal = ({ openEditModal, onClose, product, onSave }) => {
               onClick={() => refs.title.current?.focus()}
             />
             <TextField
-              label="خلاصه"
+              label="خلاصه محصول *"
               name="summary"
               value={formData.summary || ""}
               onChange={handleInputChange}
@@ -469,7 +472,7 @@ const EditProductModal = ({ openEditModal, onClose, product, onSave }) => {
               onClick={() => refs.summary.current?.focus()}
             />
             <TextField
-              label="توضیحات"
+              label="توضیحات محصول *"
               name="description"
               value={formData.description || ""}
               onChange={handleInputChange}
@@ -481,7 +484,7 @@ const EditProductModal = ({ openEditModal, onClose, product, onSave }) => {
               onClick={() => refs.description.current?.focus()}
             />
             <TextField
-              label="تگ (با کاما جدا کنید)"
+              label="تگ‌ها (اختیاری)"
               name="tags"
               value={formData.tags || ""}
               onChange={handleInputChange}
@@ -489,24 +492,34 @@ const EditProductModal = ({ openEditModal, onClose, product, onSave }) => {
               margin="dense"
               inputRef={refs.tags}
               onClick={() => refs.tags.current?.focus()}
-              helperText="مثال: لباس، پوشاک، مد"
+              placeholder="تگ‌ها را با کاما جدا کنید"
             />
             <CategorySelector
               formData={formData}
               setFormData={setFormData}
-              labelText="دسته‌بندی"
+              labelText="دسته بندی (کتگوری) *"
             />
             <TextField
-              label="قیمت (تومان)"
+              label="قیمت محصول"
               name="price"
               value={formData.price || ""}
               onChange={handleInputChange}
               fullWidth
-              required
               margin="dense"
               inputRef={refs.price}
               onClick={() => refs.price.current?.focus()}
-              helperText="فقط اعداد وارد کنید"
+            />
+            <TextField
+              label="تعداد موجودی"
+              name="count"
+              type="number"
+              value={formData.count || ""}
+              onChange={handleInputChange}
+              fullWidth
+              margin="dense"
+              inputRef={refs.count}
+              onClick={() => refs.count.current?.focus()}
+              inputProps={{ min: 0 }}
             />
           </CacheProvider>
         </DialogContent>
