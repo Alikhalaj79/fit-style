@@ -98,7 +98,7 @@ const ProductCard = ({
 
   // Stock count logic
   const stockCount = product.count || 0;
-  const isOutOfStock = stockCount === 0;
+  const isOutOfStock = variant === "cart" ? false : stockCount === 0; // Don't show as out of stock in cart
   const isLowStock = stockCount > 0 && stockCount < 5;
 
   const handleAddToCart = async () => {
@@ -140,29 +140,38 @@ const ProductCard = ({
 
   const handleIncrease = () => {
     setLoadingAction("increase");
-    increaseMutation.mutate(
-      { productId: product.id, quantity: productInCart.quantity },
-      {
-        onSettled: () => setLoadingAction(null),
-      }
-    );
+    // Use setTimeout to ensure state update happens before mutation
+    setTimeout(() => {
+      increaseMutation.mutate(
+        { productId: product.id, quantity: productInCart.quantity },
+        {
+          onSettled: () => setLoadingAction(null),
+        }
+      );
+    }, 0);
   };
 
   const handleDecrease = () => {
     setLoadingAction("decrease");
-    decreaseMutation.mutate(
-      { productId: product.id, quantity: productInCart.quantity },
-      {
-        onSettled: () => setLoadingAction(null),
-      }
-    );
+    // Use setTimeout to ensure state update happens before mutation
+    setTimeout(() => {
+      decreaseMutation.mutate(
+        { productId: product.id, quantity: productInCart.quantity },
+        {
+          onSettled: () => setLoadingAction(null),
+        }
+      );
+    }, 0);
   };
 
   const handleRemove = () => {
     setLoadingAction("remove");
-    removeMutation.mutate(product.id, {
-      onSettled: () => setLoadingAction(null),
-    });
+    // Use setTimeout to ensure state update happens before mutation
+    setTimeout(() => {
+      removeMutation.mutate(product.id, {
+        onSettled: () => setLoadingAction(null),
+      });
+    }, 0);
   };
 
   const handleFavoriteClick = (e) => {
@@ -457,18 +466,18 @@ const ProductCard = ({
               {convertPriceToPersian(product.price)} تومان
             </Typography>
 
-            {/* Stock count display */}
-            {isLowStock && variant !== "cart" && (
-              <Typography
-                sx={{
-                  fontSize: "0.8rem",
-                  fontWeight: 600,
-                  color: "#f44336",
-                }}
-              >
-                {stockCount} عدد باقی مانده
-              </Typography>
-            )}
+            {/* Stock count display - always reserve space */}
+            <Typography
+              sx={{
+                fontSize: "0.8rem",
+                fontWeight: 600,
+                color: isLowStock ? "#f44336" : "transparent",
+                height: isLowStock ? "auto" : "1.2rem", // Reserve space when not visible
+                visibility: isLowStock ? "visible" : "hidden",
+              }}
+            >
+              {isLowStock ? `${stockCount} عدد باقی مانده` : "placeholder"}
+            </Typography>
           </Box>
           {variant !== "cart" && (
             <Typography
@@ -523,7 +532,7 @@ const ProductCard = ({
                 : "auto",
           }}
         >
-          {isPending ? (
+          {loadingAction === "add" ? (
             <Button
               fullWidth
               variant="outlined"
@@ -571,7 +580,7 @@ const ProductCard = ({
                 color="primary"
                 disabled={
                   loadingAction === "increase" ||
-                  productInCart?.quantity >= stockCount
+                  (variant !== "cart" && productInCart?.quantity >= stockCount)
                 }
                 sx={{}}
               >
@@ -582,8 +591,23 @@ const ProductCard = ({
                 )}
               </IconButton>
 
-              <Typography variant="body1" fontWeight={600} sx={{}}>
-                {productInCart?.quantity}
+              <Typography
+                variant="body1"
+                fontWeight={600}
+                sx={{
+                  minWidth: "24px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                {loadingAction === "increase" ||
+                loadingAction === "decrease" ||
+                loadingAction === "remove" ? (
+                  <CircularProgress size={16} />
+                ) : (
+                  productInCart?.quantity
+                )}
               </Typography>
 
               <IconButton
