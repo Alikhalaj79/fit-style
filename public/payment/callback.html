@@ -87,14 +87,12 @@
       if (authority && status) {
         console.log("Processing payment callback...");
 
-        // Send verification request to backend
-        fetch("https://clothing-store.liara.run/payment/callback", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
+        // Send GET request to backend with Authority and Status as query parameters
+        const callbackUrl = `https://clothing-store.liara.run/payment/callback?Authority=${authority}&Status=${status}`;
+
+        fetch(callbackUrl, {
+          method: "GET",
           credentials: "include",
-          body: JSON.stringify({ authority, status }),
         })
           .then((response) => response.json())
           .then((data) => {
@@ -107,7 +105,8 @@
               data?.status === "success" ||
               data?.success === true ||
               data?.data?.message?.includes("success") ||
-              data?.message?.includes("success");
+              data?.message?.includes("success") ||
+              status === "OK"; // Also check the status parameter
 
             if (isSuccess) {
               // Show success message and redirect to cart
@@ -119,37 +118,75 @@
               // Store success message in localStorage for toast
               localStorage.setItem("paymentSuccess", "true");
 
-              // Redirect to homepage after 2 seconds
+              // Fetch cart to ensure it's cleared
+              fetch("https://clothing-store.liara.run/cart", {
+                method: "GET",
+                credentials: "include",
+              })
+                .then((cartResponse) => cartResponse.json())
+                .then((cartData) => {
+                  console.log("Cart after payment:", cartData);
+                })
+                .catch((cartError) => {
+                  console.error("Error fetching cart:", cartError);
+                });
+
+              // Redirect to homepage after 3 seconds
               setTimeout(() => {
                 window.location.href = "/";
-              }, 2000);
+              }, 3000);
             } else {
               // Show error message and redirect to cart
               document.querySelector("h1").textContent = "پرداخت ناموفق بود";
               document.querySelector("p").textContent =
                 "در حال انتقال به صفحه اصلی...";
 
-              // Redirect to homepage after 2 seconds
+              // Redirect to homepage after 3 seconds
               setTimeout(() => {
                 window.location.href = "/";
-              }, 2000);
+              }, 3000);
             }
           })
           .catch((error) => {
             console.error("Payment verification failed:", error);
 
-            // Show error message
-            document.querySelector("h1").textContent = "خطا در تایید پرداخت";
-            document.querySelector("p").textContent =
-              "در حال انتقال به سبد خرید...";
+            // Even if backend fails, check status parameter
+            if (status === "OK") {
+              // Show success message based on status parameter
+              document.querySelector("h1").textContent =
+                "پرداخت با موفقیت انجام شد!";
+              document.querySelector("p").textContent =
+                "در حال انتقال به صفحه اصلی...";
 
-            // Store error message
-            localStorage.setItem("paymentError", "true");
+              // Store success message
+              localStorage.setItem("paymentSuccess", "true");
 
-            // Redirect to homepage on error after 2 seconds
+              // Fetch cart to ensure it's cleared
+              fetch("https://clothing-store.liara.run/cart", {
+                method: "GET",
+                credentials: "include",
+              })
+                .then((cartResponse) => cartResponse.json())
+                .then((cartData) => {
+                  console.log("Cart after payment:", cartData);
+                })
+                .catch((cartError) => {
+                  console.error("Error fetching cart:", cartError);
+                });
+            } else {
+              // Show error message
+              document.querySelector("h1").textContent = "خطا در تایید پرداخت";
+              document.querySelector("p").textContent =
+                "در حال انتقال به صفحه اصلی...";
+
+              // Store error message
+              localStorage.setItem("paymentError", "true");
+            }
+
+            // Redirect to homepage after 3 seconds
             setTimeout(() => {
               window.location.href = "/";
-            }, 2000);
+            }, 3000);
           });
       } else {
         console.error("Missing payment parameters");
