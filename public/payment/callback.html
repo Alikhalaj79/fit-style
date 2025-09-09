@@ -114,24 +114,24 @@
               document.querySelector("h1").textContent =
                 "پرداخت با موفقیت انجام شد!";
               document.querySelector("p").textContent =
-                "در حال انتقال به سبد خرید...";
+                "در حال انتقال به صفحه اصلی...";
 
               // Store success message in localStorage for toast
               localStorage.setItem("paymentSuccess", "true");
 
-              // Redirect to cart after 2 seconds
+              // Redirect to homepage after 2 seconds
               setTimeout(() => {
-                window.location.href = "/cart";
+                window.location.href = "/";
               }, 2000);
             } else {
               // Show error message and redirect to cart
               document.querySelector("h1").textContent = "پرداخت ناموفق بود";
               document.querySelector("p").textContent =
-                "در حال انتقال به سبد خرید...";
+                "در حال انتقال به صفحه اصلی...";
 
-              // Redirect to cart after 2 seconds
+              // Redirect to homepage after 2 seconds
               setTimeout(() => {
-                window.location.href = "/cart";
+                window.location.href = "/";
               }, 2000);
             }
           })
@@ -146,15 +146,15 @@
             // Store error message
             localStorage.setItem("paymentError", "true");
 
-            // Redirect to cart on error after 2 seconds
+            // Redirect to homepage on error after 2 seconds
             setTimeout(() => {
-              window.location.href = "/cart";
+              window.location.href = "/";
             }, 2000);
           });
       } else {
         console.error("Missing payment parameters");
-        // Redirect to cart if parameters are missing
-        window.location.href = "/cart";
+        // Redirect to homepage if parameters are missing
+        window.location.href = "/";
       }
 
       // Fallback timeout - redirect after 10 seconds

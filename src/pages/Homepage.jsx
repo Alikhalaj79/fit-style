@@ -22,6 +22,18 @@ const Homepage = () => {
       newUrl.searchParams.delete("payment");
       window.history.replaceState({}, "", newUrl);
     }
+
+    // Check for payment success/error from localStorage (for deployed version)
+    const paymentSuccess = localStorage.getItem("paymentSuccess");
+    const paymentError = localStorage.getItem("paymentError");
+
+    if (paymentSuccess === "true") {
+      showToast("پرداخت با موفقیت انجام شد! سفارش شما ثبت گردید.", "success");
+      localStorage.removeItem("paymentSuccess");
+    } else if (paymentError === "true") {
+      showToast("خطا در تایید پرداخت. لطفاً با پشتیبانی تماس بگیرید.", "error");
+      localStorage.removeItem("paymentError");
+    }
   }, [searchParams, showToast]);
 
   return (

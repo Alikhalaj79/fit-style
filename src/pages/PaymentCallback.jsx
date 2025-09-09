@@ -32,14 +32,14 @@ const PaymentCallback = () => {
     // Only process if we have both parameters and haven't processed this payment yet
     if (!authority || !status) {
       showToast("پارامترهای پرداخت یافت نشد", "error");
-      setTimeout(() => navigate("/cart"), 1000);
+      setTimeout(() => navigate("/"), 1000);
       return;
     }
 
     // Check if we've already processed this payment (prevent infinite loop)
     const processedKey = `payment_processed_${authority}`;
     if (sessionStorage.getItem(processedKey)) {
-      navigate("/cart");
+      navigate("/");
       return;
     }
 
@@ -79,11 +79,11 @@ const PaymentCallback = () => {
           }
         }, 1000);
 
-        // Redirect to cart after 2 seconds
-        setTimeout(() => navigate("/cart"), 2000);
+        // Redirect to homepage after 2 seconds (for deployed version compatibility)
+        setTimeout(() => navigate("/"), 2000);
       } else {
         showToast("پرداخت ناموفق بود. لطفاً دوباره تلاش کنید.", "error");
-        setTimeout(() => navigate("/cart"), 2000);
+        setTimeout(() => navigate("/"), 2000);
       }
     };
 
