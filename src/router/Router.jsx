@@ -13,6 +13,7 @@ import Favorite from "../pages/Favorite";
 import ProductDetails from "../pages/ProductDetails";
 import AboutUs from "../pages/AboutUs";
 import ProductsByCategoryPage from "../pages/ProductsByCategoryPage";
+import PaymentCallback from "../pages/PaymentCallback";
 import CircularProgress from "@mui/material/CircularProgress";
 import Box from "@mui/material/Box";
 
@@ -64,6 +65,7 @@ const Router = () => {
       <Route path="/cart" element={<Cart />} />
       <Route path="/favorite" element={<Favorite />} />
       <Route path="/about-us" element={<AboutUs />} />
+      <Route path="/payment/callback" element={<PaymentCallback />} />
       <Route path="*" element={<PageNotFound />} />
       <Route path="/product/:id" element={<ProductDetails />} />
       <Route

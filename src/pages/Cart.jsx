@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
@@ -19,16 +19,25 @@ import { fetchCart, clearCart } from "../services/cartApi";
 import ProductCard from "../components/templates/homePage/ProductCard";
 import { convertPriceToPersian } from "../services/productsApi";
 import DeleteIcon from "@mui/icons-material/Delete";
+import usePaymentMutation from "../kooks/usePaymentMutation";
+import { useToast } from "../contexts/ToastContext";
 
 const Cart = () => {
   const [openDialog, setOpenDialog] = useState(false);
   const queryClient = useQueryClient();
-  const { data: cartItems, isFetching } = useQuery({
+  const { showToast } = useToast();
+
+  // Cart component will automatically refresh when user navigates here after payment
+  // The PaymentCallback component handles the payment verification and shows appropriate messages
+
+  const { data: cartData, isFetching } = useQuery({
     queryKey: ["cart"],
     queryFn: fetchCart,
-    staleTime: 1000 * 60,
-    select: (data) => data?.items || [],
+    staleTime: 0, // Always fetch fresh data to ensure cart is updated after payment
   });
+
+  const cartItems = cartData?.items || [];
+  const cartId = cartData?._id;
 
   const clearCartMutation = useMutation({
     mutationFn: clearCart,
@@ -37,6 +46,8 @@ const Cart = () => {
       setOpenDialog(false);
     },
   });
+
+  const paymentMutation = usePaymentMutation();
 
   const calculateTotalPrice = () => {
     return cartItems?.reduce((total, item) => {
@@ -52,6 +63,14 @@ const Cart = () => {
 
   const handleClearCart = () => {
     setOpenDialog(true);
+  };
+
+  const handleSubmitOrder = () => {
+    if (cartId) {
+      paymentMutation.mutate(cartId);
+    } else {
+      console.error("Cart ID not available");
+    }
   };
 
   if (isFetching && !cartItems) {
@@ -223,6 +242,8 @@ const Cart = () => {
               variant="contained"
               fullWidth
               size="large"
+              onClick={handleSubmitOrder}
+              disabled={paymentMutation.isPending || !cartId}
               sx={{
                 mt: 2,
                 borderRadius: 2,
@@ -231,7 +252,11 @@ const Cart = () => {
                 py: { xs: 1, sm: 1.5 },
               }}
             >
-              ثبت سفارش
+              {paymentMutation.isPending ? (
+                <CircularProgress size={24} sx={{ color: "#fff" }} />
+              ) : (
+                "ثبت سفارش"
+              )}
             </Button>
             <Button
               variant="outlined"

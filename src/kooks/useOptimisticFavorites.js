@@ -25,7 +25,9 @@ export const useOptimisticFavorites = () => {
 
   // Update optimistic state when server data changes
   useEffect(() => {
-    setOptimisticFavorites(favoritesData);
+    if (favoritesData && favoritesData.length >= 0) {
+      setOptimisticFavorites(favoritesData);
+    }
   }, [favoritesData]);
 
   // Manual optimistic update function

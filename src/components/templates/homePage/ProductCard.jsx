@@ -71,7 +71,9 @@ const ProductCard = ({
   } = useOptimisticFavorites();
 
   // Check if current product is in favorites
-  const internalIsProductFavorite = optimisticIsProductFavorite(product.id);
+  const internalIsProductFavorite = product?.id
+    ? optimisticIsProductFavorite(product.id)
+    : false;
 
   // Use external function if provided, otherwise use internal logic
   const isProductFavorite = externalIsProductFavorite

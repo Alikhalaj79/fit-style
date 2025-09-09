@@ -4,36 +4,13 @@ export const fetchFavoriteProducts = async () => {
   try {
     const response = await api.get("saved-items");
 
-    console.log("=== fetchFavoriteProducts Debug ===");
-    console.log("Raw response:", response);
-    console.log("Response data:", response.data);
-    console.log("Response data.data:", response.data?.data);
-    console.log(
-      "Response data.data.savedItems:",
-      response.data?.data?.savedItems
-    );
-    console.log(
-      "Response data.data.savedItems.items:",
-      response.data?.data?.savedItems?.items
-    );
-    console.log("===================================");
-
     // Extract items from the new response structure
     if (response.data?.data?.savedItems?.items) {
-      console.log("Returning items:", response.data.data.savedItems.items);
       return response.data.data.savedItems.items;
     }
 
-    console.log("No items found, returning empty array");
     return [];
   } catch (error) {
-    console.log("=== fetchFavoriteProducts Error ===");
-    console.log("Error:", error);
-    console.log("Error response:", error.response);
-    console.log("Error status:", error.response?.status);
-    console.log("Error data:", error.response?.data);
-    console.log("================================");
-
     // Check if it's a 401 (unauthorized) error
     if (error.response?.status === 401) {
       throw new Error("لطفا وارد حساب کاربری شوید");

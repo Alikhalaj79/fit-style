@@ -46,6 +46,12 @@ export const ToastProvider = ({ children }) => {
         autoHideDuration={4000}
         onClose={hideToast}
         anchorOrigin={{ vertical: "top", horizontal: "center" }}
+        sx={{
+          marginTop: 2,
+          "& .MuiSnackbarContent-root": {
+            padding: 0,
+          },
+        }}
       >
         <Alert
           onClose={hideToast}
@@ -56,9 +62,19 @@ export const ToastProvider = ({ children }) => {
             borderRadius: 2,
             fontSize: "0.9rem",
             fontWeight: 500,
+            padding: "12px 20px",
+            margin: "8px",
+            minWidth: "300px",
+            maxWidth: "500px",
             "& .MuiAlert-message": {
               textAlign: "center",
               width: "100%",
+              padding: "4px 8px",
+              lineHeight: 1.5,
+            },
+            "& .MuiAlert-action": {
+              paddingLeft: 2,
+              marginRight: 1,
             },
           }}
         >
