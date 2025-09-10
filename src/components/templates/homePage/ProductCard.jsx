@@ -12,6 +12,8 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
+  Alert,
+  Snackbar,
 } from "@mui/material";
 import ShoppingBagIcon from "@mui/icons-material/ShoppingBag";
 import AddIcon from "@mui/icons-material/Add";
@@ -49,6 +51,7 @@ const ProductCard = ({
   const [loadingAction, setLoadingAction] = useState(null); // "add" | "increase" | "decrease" | "remove"
   const [pendingProductId, setPendingProductId] = useState(null);
   const [isFavorite, setIsFavorite] = useState(false);
+  const [showLoginAlert, setShowLoginAlert] = useState(false);
   const queryClient = useQueryClient();
   const navigate = useNavigate();
 
@@ -57,6 +60,15 @@ const ProductCard = ({
     queryFn: fetchCart,
     staleTime: 1000 * 60,
   });
+
+  // Check authentication state
+  const { data: profileData } = useQuery({
+    queryKey: ["profile"],
+    queryFn: getUserProfile,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
+
+  const isLoggedIn = profileData?.data?.data?.user;
   // console.log(product);
 
   const { addMutation, increaseMutation, decreaseMutation, removeMutation } =
@@ -178,6 +190,12 @@ const ProductCard = ({
 
   const handleFavoriteClick = (e) => {
     e.stopPropagation();
+
+    // Check if user is logged in
+    if (!isLoggedIn) {
+      setShowLoginAlert(true);
+      return;
+    }
 
     // لاگ برای دیباگ - کلیک روی قلب
     console.log("=== Favorite Click Debug ===");
@@ -763,6 +781,32 @@ const ProductCard = ({
         openImage={openImage}
         handleCloseImage={handleCloseImage}
       />
+
+      {/* Login Alert Snackbar */}
+      <Snackbar
+        open={showLoginAlert}
+        autoHideDuration={4000}
+        onClose={() => setShowLoginAlert(false)}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      >
+        <Alert
+          onClose={() => setShowLoginAlert(false)}
+          severity="warning"
+          sx={{
+            width: "100%",
+            padding: "12px 16px",
+            "& .MuiAlert-icon": {
+              marginRight: "12px",
+            },
+            "& .MuiAlert-action": {
+              marginLeft: "12px",
+            },
+          }}
+        >
+          برای افزودن محصول به علاقه‌مندی‌ها، لطفاً ابتدا وارد حساب کاربری خود
+          شوید.
+        </Alert>
+      </Snackbar>
     </>
   );
 };
