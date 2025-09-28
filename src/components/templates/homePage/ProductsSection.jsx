@@ -28,7 +28,13 @@ const ProductsSection = () => {
       <Typography variant="h5" fontWeight="bold" sx={{ mb: 2 }}>
         محصولات ویژه
       </Typography>
-      <Box sx={{ display: "flex", flexWrap: "wrap",  justifyContent:"space-between" }}>
+      <Box
+        sx={{
+          display: "flex",
+          flexWrap: "wrap",
+          justifyContent: "space-between",
+        }}
+      >
         {randomProducts.map((product) => (
           <ProductCard key={product.id} product={product} isAdmin={false} />
         ))}

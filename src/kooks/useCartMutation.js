@@ -44,7 +44,7 @@ export const useCartMutations = ({ setPendingProductId, setLoadingAction }) => {
       onSettled: () => {
         queryClient.invalidateQueries({ queryKey: ["cart"] });
         setPendingProductId(null);
-        setLoadingAction(null);
+        // Don't set loadingAction here - let the component handle it
       },
     }),
 
@@ -69,7 +69,7 @@ export const useCartMutations = ({ setPendingProductId, setLoadingAction }) => {
       onSettled: () => {
         queryClient.invalidateQueries({ queryKey: ["cart"] });
         setPendingProductId(null);
-        setLoadingAction(null);
+        // Don't set loadingAction here - let the component handle it
       },
     }),
 
@@ -94,6 +94,7 @@ export const useCartMutations = ({ setPendingProductId, setLoadingAction }) => {
       onSettled: () => {
         queryClient.invalidateQueries({ queryKey: ["cart"] });
         setPendingProductId(null);
+        // Don't set loadingAction here - let the component handle it
       },
     }),
 
@@ -113,6 +114,7 @@ export const useCartMutations = ({ setPendingProductId, setLoadingAction }) => {
       onSettled: () => {
         queryClient.invalidateQueries({ queryKey: ["cart"] });
         setPendingProductId(null);
+        // Don't set loadingAction here - let the component handle it
       },
     }),
   };

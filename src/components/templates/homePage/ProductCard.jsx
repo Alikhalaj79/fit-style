@@ -92,13 +92,6 @@ const ProductCard = ({
     ? externalIsProductFavorite(product.id)
     : internalIsProductFavorite;
 
-  // لاگ برای دیباگ - ID کارد
-  if (favoriteItemId) {
-    console.log("ProductCard - Favorite Item ID:", favoriteItemId);
-    console.log("ProductCard - Product ID:", product.id);
-    console.log("ProductCard - Product:", product);
-  }
-
   // Optimistic mutations are now handled by useOptimisticFavorites hook
 
   const handleOpenImage = () => setOpenImage(true);
@@ -154,38 +147,29 @@ const ProductCard = ({
 
   const handleIncrease = () => {
     setLoadingAction("increase");
-    // Use setTimeout to ensure state update happens before mutation
-    setTimeout(() => {
-      increaseMutation.mutate(
-        { productId: product.id, quantity: productInCart.quantity },
-        {
-          onSettled: () => setLoadingAction(null),
-        }
-      );
-    }, 0);
+    increaseMutation.mutate(
+      { productId: product.id, quantity: productInCart.quantity },
+      {
+        onSettled: () => setLoadingAction(null),
+      }
+    );
   };
 
   const handleDecrease = () => {
     setLoadingAction("decrease");
-    // Use setTimeout to ensure state update happens before mutation
-    setTimeout(() => {
-      decreaseMutation.mutate(
-        { productId: product.id, quantity: productInCart.quantity },
-        {
-          onSettled: () => setLoadingAction(null),
-        }
-      );
-    }, 0);
+    decreaseMutation.mutate(
+      { productId: product.id, quantity: productInCart.quantity },
+      {
+        onSettled: () => setLoadingAction(null),
+      }
+    );
   };
 
   const handleRemove = () => {
     setLoadingAction("remove");
-    // Use setTimeout to ensure state update happens before mutation
-    setTimeout(() => {
-      removeMutation.mutate(product.id, {
-        onSettled: () => setLoadingAction(null),
-      });
-    }, 0);
+    removeMutation.mutate(product.id, {
+      onSettled: () => setLoadingAction(null),
+    });
   };
 
   const handleFavoriteClick = (e) => {
@@ -196,15 +180,6 @@ const ProductCard = ({
       setShowLoginAlert(true);
       return;
     }
-
-    // لاگ برای دیباگ - کلیک روی قلب
-    console.log("=== Favorite Click Debug ===");
-    console.log("Product ID:", product.id);
-    console.log("Product _ID:", product._id);
-    console.log("Favorite Item ID:", favoriteItemId);
-    console.log("Is Product Favorite:", isProductFavorite);
-    console.log("Has External Function:", !!externalOnFavoriteClick);
-    console.log("===========================");
 
     // Use external function if provided, otherwise use internal logic
     if (externalOnFavoriteClick) {
