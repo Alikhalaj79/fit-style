@@ -33,6 +33,11 @@ const ProductCard = ({ product, isAdmin, isSelected = false, onSelect }) => {
   const [openDeleteModal, setOpenDeleteModal] = useState(false);
   const [isFavorite, setIsFavorite] = useState(false);
 
+  // Stock count logic
+  const stockCount = product.count || 0;
+  const isOutOfStock = stockCount === 0;
+  const isLowStock = stockCount > 0 && stockCount < 5;
+
   const handleOpenImage = () => {
     setOpenImage(true);
   };
@@ -225,6 +230,33 @@ const ProductCard = ({ product, isAdmin, isSelected = false, onSelect }) => {
           >
             {convertPriceToPersian(product.price)} تومان
           </Typography>
+
+          {/* Stock Information */}
+          <Chip
+            label={
+              isOutOfStock
+                ? "ناموجود"
+                : isLowStock
+                ? `${stockCount} عدد باقی مانده`
+                : `${stockCount} عدد موجود`
+            }
+            size="small"
+            sx={{
+              backgroundColor: isOutOfStock
+                ? "#ffebee"
+                : isLowStock
+                ? "#fff3e0"
+                : "#e8f5e8",
+              color: isOutOfStock
+                ? "#d32f2f"
+                : isLowStock
+                ? "#f57c00"
+                : "#2e7d32",
+              fontWeight: 600,
+              fontSize: "0.75rem",
+              alignSelf: "flex-start",
+            }}
+          />
         </Box>
       </CardContent>
 

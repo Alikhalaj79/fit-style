@@ -78,6 +78,11 @@ const ProductDetails = () => {
 
   const isPending = pendingProductId === productData?._id;
 
+  // Stock count logic
+  const stockCount = productData?.count || 0;
+  const isOutOfStock = stockCount === 0;
+  const isLowStock = stockCount > 0 && stockCount < 5;
+
   // Reset loadingAction when pendingProductId becomes null
   useEffect(() => {
     if (!pendingProductId) {
@@ -86,6 +91,11 @@ const ProductDetails = () => {
   }, [pendingProductId]);
 
   const handleAddToCart = async () => {
+    // Prevent adding out-of-stock products
+    if (isOutOfStock) {
+      return;
+    }
+
     setLoadingAction("add");
     try {
       const profileData = queryClient.getQueryData(["profile"]);
@@ -356,6 +366,55 @@ const ProductDetails = () => {
                 {convertPriceToPersian(productData.price || 0)} تومان
               </Typography>
 
+              {/* Stock Information */}
+              {isOutOfStock ? (
+                <Box
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    mb: 3,
+                    p: 2,
+                    backgroundColor: "#ffebee",
+                    borderRadius: 2,
+                    border: "1px solid #f44336",
+                  }}
+                >
+                  <Typography
+                    sx={{
+                      color: "#d32f2f",
+                      fontWeight: 600,
+                      fontSize: "1.1rem",
+                    }}
+                  >
+                    ناموجود
+                  </Typography>
+                </Box>
+              ) : isLowStock ? (
+                <Box
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    mb: 3,
+                    p: 2,
+                    backgroundColor: "#fff3e0",
+                    borderRadius: 2,
+                    border: "1px solid #ff9800",
+                  }}
+                >
+                  <Typography
+                    sx={{
+                      color: "#f57c00",
+                      fontWeight: 600,
+                      fontSize: "1rem",
+                    }}
+                  >
+                    {stockCount} عدد باقی مانده
+                  </Typography>
+                </Box>
+              ) : null}
+
               {/* Summary */}
               {productData.summary && (
                 <Typography
@@ -402,7 +461,28 @@ const ProductDetails = () => {
 
               {/* دکمه‌های سبد خرید */}
               <Box sx={{ mb: 4, textAlign: "center" }}>
-                {isPending ? (
+                {isOutOfStock ? (
+                  <Button
+                    fullWidth
+                    variant="outlined"
+                    disabled
+                    sx={{
+                      maxWidth: 400,
+                      padding: "12px",
+                      borderRadius: 2,
+                      borderColor: "#e0e0e0",
+                      color: "#9e9e9e",
+                      backgroundColor: "#f5f5f5",
+                      "&:disabled": {
+                        color: "#9e9e9e",
+                        borderColor: "#e0e0e0",
+                        backgroundColor: "#f5f5f5",
+                      },
+                    }}
+                  >
+                    ناموجود
+                  </Button>
+                ) : isPending ? (
                   <Button
                     fullWidth
                     variant="outlined"
@@ -436,7 +516,10 @@ const ProductDetails = () => {
                     <IconButton
                       onClick={handleIncrease}
                       color="primary"
-                      disabled={loadingAction === "increase"}
+                      disabled={
+                        loadingAction === "increase" ||
+                        productInCart?.quantity >= stockCount
+                      }
                       sx={{ color: "#FF6B00" }}
                     >
                       {loadingAction === "increase" ? (

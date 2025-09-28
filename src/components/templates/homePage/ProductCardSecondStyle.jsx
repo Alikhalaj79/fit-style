@@ -7,6 +7,10 @@ import {
 } from "../../../services/productsApi";
 
 const ProductCardSecondStyle = ({ product }) => {
+  // Stock count logic
+  const stockCount = product.count || 0;
+  const isOutOfStock = stockCount === 0;
+
   return (
     <Box
       sx={{
@@ -18,11 +22,52 @@ const ProductCardSecondStyle = ({ product }) => {
         borderRadius: 4,
         transition: "all 0.3s ease-in-out",
         "&:hover .details": {
-          opacity: 1,
-          transform: "translateY(0)",
+          opacity: isOutOfStock ? 0 : 1,
+          transform: isOutOfStock ? "translateY(100%)" : "translateY(0)",
         },
+        cursor: isOutOfStock ? "not-allowed" : "default",
+        opacity: isOutOfStock ? 0.8 : 1,
       }}
     >
+      {/* Out of stock overlay */}
+      {isOutOfStock && (
+        <Box
+          sx={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: "rgba(0, 0, 0, 0.15)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 3,
+            borderRadius: 4,
+            transition: "all 0.2s ease-in-out",
+            pointerEvents: "none",
+          }}
+        >
+          <Typography
+            sx={{
+              color: "#9e9e9e",
+              fontWeight: 500,
+              fontSize: "0.95rem",
+              textAlign: "center",
+              letterSpacing: "0.3px",
+              backgroundColor: "rgba(255, 255, 255, 0.9)",
+              padding: "6px 12px",
+              borderRadius: "16px",
+              border: "1px solid rgba(158, 158, 158, 0.2)",
+              backdropFilter: "blur(8px)",
+              boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
+            }}
+          >
+            ناموجود
+          </Typography>
+        </Box>
+      )}
+
       {/* تصویر محصول */}
       <Box
         sx={{
@@ -56,6 +101,8 @@ const ProductCardSecondStyle = ({ product }) => {
               height: "100%",
               objectFit: "cover",
               transition: "transform 0.3s",
+              filter: isOutOfStock ? "grayscale(40%) brightness(0.9)" : "none",
+              opacity: isOutOfStock ? 0.9 : 1,
             }}
             loading="lazy"
             crossOrigin="anonymous"
@@ -82,6 +129,7 @@ const ProductCardSecondStyle = ({ product }) => {
           transform: "translateY(100%)",
           transition: "all 0.3s ease-in-out",
           padding: 2,
+          pointerEvents: isOutOfStock ? "none" : "auto",
         }}
       >
         <Typography
@@ -116,25 +164,31 @@ const ProductCardSecondStyle = ({ product }) => {
 
       {/* دکمه خرید کنید */}
       <Button
-        component={Link}
-        to={`/product/${product.id}`}
+        component={isOutOfStock ? "span" : Link}
+        to={isOutOfStock ? undefined : `/product/${product.id}`}
+        disabled={isOutOfStock}
         sx={{
           position: "absolute",
           bottom: 8,
           left: 8,
-          backgroundColor: "#f4a261",
-          color: "#fff",
+          backgroundColor: isOutOfStock ? "#e0e0e0" : "#f4a261",
+          color: isOutOfStock ? "#9e9e9e" : "#fff",
           borderRadius: 20,
           padding: "6px 16px",
           fontWeight: 600,
           textTransform: "none",
+          cursor: isOutOfStock ? "not-allowed" : "pointer",
           "&:hover": {
-            backgroundColor: "#e07a5f",
+            backgroundColor: isOutOfStock ? "#e0e0e0" : "#e07a5f",
+          },
+          "&:disabled": {
+            backgroundColor: "#e0e0e0",
+            color: "#9e9e9e",
           },
           zIndex: 1,
         }}
       >
-        جزئیات محصول
+        {isOutOfStock ? "ناموجود" : "جزئیات محصول"}
       </Button>
     </Box>
   );
