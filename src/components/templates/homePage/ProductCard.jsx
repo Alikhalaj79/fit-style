@@ -83,13 +83,14 @@ const ProductCard = ({
   } = useOptimisticFavorites();
 
   // Check if current product is in favorites
-  const internalIsProductFavorite = product?.id
-    ? optimisticIsProductFavorite(product.id)
-    : false;
+  const internalIsProductFavorite =
+    product?._id || product?.id
+      ? optimisticIsProductFavorite(product._id || product.id)
+      : false;
 
   // Use external function if provided, otherwise use internal logic
   const isProductFavorite = externalIsProductFavorite
-    ? externalIsProductFavorite(product.id)
+    ? externalIsProductFavorite(product._id || product.id)
     : internalIsProductFavorite;
 
   // Optimistic mutations are now handled by useOptimisticFavorites hook
@@ -98,10 +99,10 @@ const ProductCard = ({
   const handleCloseImage = () => setOpenImage(false);
 
   const productInCart = cartData?.items.find(
-    (item) => item.productId._id === product.id
+    (item) => item.productId._id === (product._id || product.id)
   );
 
-  const isPending = pendingProductId === product.id;
+  const isPending = pendingProductId === (product._id || product.id);
 
   // Stock count logic
   const stockCount = product.count || 0;
@@ -125,7 +126,7 @@ const ProductCard = ({
       }
 
       addMutation.mutate(
-        { productId: product.id, quantity: 1 },
+        { productId: product._id || product.id, quantity: 1 },
         {
           onSettled: () => setLoadingAction(null),
         }
@@ -148,7 +149,10 @@ const ProductCard = ({
   const handleIncrease = () => {
     setLoadingAction("increase");
     increaseMutation.mutate(
-      { productId: product.id, quantity: productInCart.quantity },
+      {
+        productId: product._id || product.id,
+        quantity: productInCart.quantity,
+      },
       {
         onSettled: () => setLoadingAction(null),
       }
@@ -158,7 +162,10 @@ const ProductCard = ({
   const handleDecrease = () => {
     setLoadingAction("decrease");
     decreaseMutation.mutate(
-      { productId: product.id, quantity: productInCart.quantity },
+      {
+        productId: product._id || product.id,
+        quantity: productInCart.quantity,
+      },
       {
         onSettled: () => setLoadingAction(null),
       }
@@ -167,7 +174,7 @@ const ProductCard = ({
 
   const handleRemove = () => {
     setLoadingAction("remove");
-    removeMutation.mutate(product.id, {
+    removeMutation.mutate(product._id || product.id, {
       onSettled: () => setLoadingAction(null),
     });
   };
@@ -190,9 +197,9 @@ const ProductCard = ({
       externalOnFavoriteClick(idToUse);
     } else {
       if (isProductFavorite) {
-        removeFromFavoriteMutation.mutate(product.id);
+        removeFromFavoriteMutation.mutate(product._id || product.id);
       } else {
-        addToFavoriteMutation.mutate(product.id);
+        addToFavoriteMutation.mutate(product._id || product.id);
       }
     }
   };
@@ -477,7 +484,11 @@ const ProductCard = ({
           {variant !== "cart" && (
             <Typography
               component={isOutOfStock ? "span" : Link}
-              to={isOutOfStock ? undefined : `/product/${product.id}`}
+              to={
+                isOutOfStock
+                  ? undefined
+                  : `/product/${product._id || product.id}`
+              }
               sx={{
                 fontSize: "0.875rem",
                 color: isOutOfStock ? "#9e9e9e" : "#1976d2",
@@ -652,7 +663,11 @@ const ProductCard = ({
           {variant === "cart" && (
             <Typography
               component={isOutOfStock ? "span" : Link}
-              to={isOutOfStock ? undefined : `/product/${product.id}`}
+              to={
+                isOutOfStock
+                  ? undefined
+                  : `/product/${product._id || product.id}`
+              }
               sx={{
                 fontSize: { xs: "0.875rem", sm: "0.875rem", md: "0.9rem" },
                 color: isOutOfStock ? "#9e9e9e" : "#757575",
