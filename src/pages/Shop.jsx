@@ -353,26 +353,6 @@ const Shop = () => {
                     <Typography variant="h5" fontWeight={600}>
                       {group.category.name}
                     </Typography>
-                    <Link
-                      to={`/category/${
-                        group.category.slug || group.category.id
-                      }`}
-                      style={{ textDecoration: "none" }}
-                    >
-                      <Button
-                        variant="outlined"
-                        sx={{
-                          borderColor: "#FF6B00",
-                          color: "#FF6B00",
-                          "&:hover": {
-                            borderColor: "#E55F00",
-                            backgroundColor: "rgba(255,107,0,0.04)",
-                          },
-                        }}
-                      >
-                        مشاهده همه محصولات دسته ({group.category.name})
-                      </Button>
-                    </Link>
                   </Box>
                   <Grid
                     container
@@ -419,6 +399,24 @@ const Shop = () => {
                       </Button>
                     </Box>
                   )}
+                  <Link
+                    to={`/category/${group.category.slug || group.category.id}`}
+                    style={{ textDecoration: "none" }}
+                  >
+                    <Button
+                      variant="outlined"
+                      sx={{
+                        borderColor: "#FF6B00",
+                        color: "#FF6B00",
+                        "&:hover": {
+                          borderColor: "#E55F00",
+                          backgroundColor: "rgba(255,107,0,0.04)",
+                        },
+                      }}
+                    >
+                      مشاهده همه محصولات دسته ({group.category.name})
+                    </Button>
+                  </Link>
                 </Box>
               ))}
             </Box>

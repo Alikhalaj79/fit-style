@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import {
   TextField,
   Button,
@@ -31,8 +31,11 @@ const CategoryForm = () => {
     title: "",
     slug: "",
     icon: "",
+    photo: "",
     parent: "",
   });
+  const [photoPreviewUrl, setPhotoPreviewUrl] = useState("");
+  const fileInputRef = useRef(null);
 
   const { mutate, isLoading, error } = useMutation({
     mutationFn: createCategory,
@@ -62,11 +65,33 @@ const CategoryForm = () => {
     const filteredData = { ...formData };
     if (!filteredData.slug) delete filteredData.slug;
     if (!filteredData.parent) delete filteredData.parent;
+    if (!filteredData.photo) delete filteredData.photo;
     mutate(filteredData);
   };
 
   const handleCloseSnackbar = () => {
     setOpenSnackbar(false);
+  };
+
+  const handlePhotoChange = (e) => {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+    setFormData({
+      ...formData,
+      photo: file.name,
+    });
+    const url = URL.createObjectURL(file);
+    setPhotoPreviewUrl(url);
+  };
+
+  const handleRemovePhoto = () => {
+    setFormData({
+      ...formData,
+      photo: "",
+    });
+    if (photoPreviewUrl) URL.revokeObjectURL(photoPreviewUrl);
+    setPhotoPreviewUrl("");
+    if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
   return (
@@ -107,6 +132,47 @@ const CategoryForm = () => {
             fullWidth
             margin="normal"
           />
+          <Box sx={{ mt: 2 }}>
+            <Typography variant="subtitle2" sx={{ mb: 1 }}>
+              تصویر
+            </Typography>
+            <input
+              ref={fileInputRef}
+              type="file"
+              name="photo"
+              accept="image/*"
+              onChange={handlePhotoChange}
+              style={{ display: "none" }}
+            />
+            <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+              <Button
+                variant="outlined"
+                onClick={() =>
+                  fileInputRef.current && fileInputRef.current.click()
+                }
+              >
+                انتخاب تصویر
+              </Button>
+              {formData.photo && (
+                <Button
+                  color="error"
+                  variant="text"
+                  onClick={handleRemovePhoto}
+                >
+                  حذف تصویر
+                </Button>
+              )}
+            </Box>
+            {photoPreviewUrl && (
+              <Box sx={{ mt: 2, borderRadius: 1, overflow: "hidden" }}>
+                <img
+                  src={photoPreviewUrl}
+                  alt="پیش‌نمایش تصویر"
+                  style={{ width: "100%", height: 180, objectFit: "cover" }}
+                />
+              </Box>
+            )}
+          </Box>
           {/*  getCategory Input */}
           <CategorySelector
             formData={formData}

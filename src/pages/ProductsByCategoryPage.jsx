@@ -95,7 +95,7 @@ const ProductsByCategoryPage = () => {
           component={RouterLink}
           underline="hover"
           color="inherit"
-          to="/categories"
+          to="/shop"
         >
           دسته‌بندی‌ها
         </MuiLink>
