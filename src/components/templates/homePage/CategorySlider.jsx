@@ -20,23 +20,22 @@ import womensPants from "../../../assets/saticCategories/womens-pants.jpg";
 import womensAccessory from "../../../assets/saticCategories/womens-accessory.jpg";
 
 const categoryImages = {
-  "shirt": mensShirt,
+  shirt: mensShirt,
   "t-shirt": mensTshirt,
-  "shalvar": mensPants,
+  shalvar: mensPants,
   "kot-o-jakat": mensCosts,
-  "accessory": mensAccessory,
-  "manto": womensManto,
-  "shoomiz": womensShoomiz,
-  "daman": womensSkrit,
+  accessory: mensAccessory,
+  manto: womensManto,
+  shoomiz: womensShoomiz,
+  daman: womensSkrit,
   "kot-va-palto": womensCoats,
   "shalvar-zananeh": womensPants,
-  "accessoryz": womensAccessory,
+  accessoryz: womensAccessory,
 };
-
 
 const getRandomItems = (array, count) => {
   const shuffled = [...array].sort(() => 0.5 - Math.random());
-  return shuffled.slice(0, count); 
+  return shuffled.slice(0, count);
 };
 
 const CategorySlider = () => {
@@ -55,7 +54,7 @@ const CategorySlider = () => {
   if (error) return <Typography>خطا در دریافت اطلاعات</Typography>;
 
   return (
-    <Box sx={{ mt: 10,mb:5, px: 2 }}>
+    <Box sx={{ mt: 10, mb: 5, px: 2 }}>
       <Typography variant="h5" fontWeight="bold" sx={{ mb: 2 }}>
         دسته‌ بندی‌ های پیشنهادی
       </Typography>
@@ -74,7 +73,7 @@ const CategorySlider = () => {
         {randomCategories.map((category) => (
           <SwiperSlide key={category._id}>
             <Link
-              to={`/categories/${category._id}`}
+              to={`/category/${category.slug}`}
               style={{ textDecoration: "none" }}
             >
               <Box
@@ -86,7 +85,7 @@ const CategorySlider = () => {
                   background: "#f5f5f5",
                   borderRadius: 3,
                   padding: 2,
-                  height: 300, 
+                  height: 300,
                 }}
               >
                 <img
@@ -96,14 +95,14 @@ const CategorySlider = () => {
                   }
                   alt={category.title}
                   style={{
-                    width: "200px", 
+                    width: "200px",
                     height: "200px",
                     objectFit: "cover",
-                    borderRadius: "15px", 
-                    marginBottom: "10px", 
+                    borderRadius: "15px",
+                    marginBottom: "10px",
                   }}
                 />
-                <Typography variant="body1" fontWeight="bold" sx={{mt:3}}>
+                <Typography variant="body1" fontWeight="bold" sx={{ mt: 3 }}>
                   {category.title}
                 </Typography>
               </Box>

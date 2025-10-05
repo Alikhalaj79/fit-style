@@ -58,7 +58,9 @@ const ProductsByCategoryPage = () => {
   const allProducts = productsData?.data?.products || [];
 
   const filteredProducts = allProducts.filter(
-    (product) => product.category?.slug === categorySlug
+    (product) =>
+      product.category?.slug === categorySlug ||
+      product.category?.id === categorySlug
   );
 
   let currentCategoryName = categorySlug;

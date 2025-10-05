@@ -66,12 +66,12 @@ const Router = () => {
       <Route path="/favorite" element={<Favorite />} />
       <Route path="/about-us" element={<AboutUs />} />
       <Route path="/payment/callback" element={<PaymentCallback />} />
-      <Route path="*" element={<PageNotFound />} />
       <Route path="/product/:id" element={<ProductDetails />} />
       <Route
         path="/category/:categorySlug"
         element={<ProductsByCategoryPage />}
       />
+      <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
 };
