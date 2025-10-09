@@ -69,6 +69,13 @@ const SendOtpForm = ({ mobile, setStep, setMobile, startTimer, timer }) => {
       setSnackbarOpen(true); // Show snackbar on successful copy
     });
   };
+
+  // Handle copying admin phone number to clipboard
+  const handleCopyAdminNumber = (phoneNumber) => {
+    navigator.clipboard.writeText(phoneNumber).then(() => {
+      setSnackbarOpen(true); // Show snackbar on successful copy
+    });
+  };
   // Close snackbar
   const handleCloseSnackbar = () => {
     setSnackbarOpen(false);
@@ -172,6 +179,54 @@ const SendOtpForm = ({ mobile, setStep, setMobile, startTimer, timer }) => {
             روی کد کلیک کنید تا کپی شود و برای ورود در مرحله بعد از آن استفاده
             کنید.
           </Typography>
+
+          {/* Admin Phone Numbers Section */}
+          <Typography
+            variant="body2"
+            color="textSecondary"
+            sx={{ marginTop: 3, marginBottom: 2 }}
+          >
+            همچنین می‌توانید با این شماره‌ها به عنوان ادمین وارد سایت شوید:
+          </Typography>
+
+          <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+            <Typography
+              variant="body1"
+              sx={{
+                fontFamily: "monospace",
+                cursor: "pointer",
+                color: "#1976d2",
+                "&:hover": {
+                  textDecoration: "underline",
+                },
+              }}
+              onClick={() => handleCopyAdminNumber("09362566278")}
+            >
+              09362566278
+            </Typography>
+
+            <Typography
+              variant="body1"
+              sx={{
+                fontFamily: "monospace",
+                cursor: "pointer",
+                color: "#1976d2",
+                "&:hover": {
+                  textDecoration: "underline",
+                },
+              }}
+              onClick={() => handleCopyAdminNumber("09109860788")}
+            >
+              09109860788
+            </Typography>
+          </div>
+          <Typography
+            variant="caption"
+            color="textSecondary"
+            sx={{ marginTop: 1, fontSize: "0.75rem" }}
+          >
+            روی شماره‌ها کلیک کرده تا کپی شود
+          </Typography>
         </DialogContent>
         <DialogActions>
           <Button onClick={handleClose} color="primary">
@@ -198,7 +253,7 @@ const SendOtpForm = ({ mobile, setStep, setMobile, startTimer, timer }) => {
         open={snackbarOpen}
         autoHideDuration={3000}
         onClose={handleCloseSnackbar}
-        message="کد تایید کپی شد!"
+        message="کپی شد!"
       />
     </Grid2>
   );
